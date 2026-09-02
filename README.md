@@ -29,9 +29,10 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 0
-프로젝트 설계
-상태: 구현 전
+Phase 1
+시연 가능한 제품 MVP
+코드: 구현 전
+하네스: READY
 ```
 
 첫 번째 목표는 성능이 아니다.
@@ -448,3 +449,40 @@ Legacy → New 점진 전환과 Shadow Traffic
 ```
 
 AI는 핵심 시스템을 완성한 뒤에만 검토한다.
+
+---
+
+## 바이브 루프
+
+구현은 대화로 바로 코드를 쓰지 않는다.
+
+```text
+Analysis → Plan(HITL) → Red → Green → Lint → Refactor → Summary
+```
+
+```text
+AGENTS.md                                    에이전트 진입점
+.cursor/rules/ad-flow.mdc                    항상 적용 규칙
+.cursor/skills/ad-flow-vibe-coding/SKILL.md  Task 루프
+.agent/config.yaml                           런타임 / 거버넌스
+.agent/artifacts/<task-id>/                  현재 Task 산출물
+docs/Poc.md                                  상태 그래프 철학
+```
+
+현재 작업은 `docs/TASKS.md`다. Plan 승인 전에 프로덕션 코드를 넣지 않는다.
+
+---
+
+## 문서
+
+```text
+docs/REQUIREMENTS.md  무엇을 만족해야 하는가
+docs/DESIGN.md        목표 / 현재 시스템 구조
+docs/ROADMAP.md       문제 확인 순서
+docs/TASKS.md         현재 Phase 작업
+docs/Poc.md           바이브 하네스 철학
+docs/adr/             설계 결정
+docs/experiments/     측정 결과
+```
+
+설계 원문: [① AdFlow - Mini OTT Ad Platform 프로젝트 설계](https://cmcm.tistory.com/49)

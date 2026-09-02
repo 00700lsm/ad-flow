@@ -1,0 +1,197 @@
+---
+description: AdFlow 바이브 프로그래밍 규칙. 문서 정본, TDD 상태 그래프, Phase 범위, Human Gate.
+alwaysApply: true
+---
+
+# AdFlow Project Rule
+
+## 1. Core Principle
+
+AI는 구현 속도를 높이는 도구다.
+요구사항, 성공 기준, 기술 선택, Scope의 최종 판단은 개발자가 한다.
+
+```text
+기술을 사용했다  ≠  문제를 해결했다
+코드가 동작한다  ≠  제품이 시연된다
+k6로 넣었다     ≠  개선됐다
+변경했다        ≠  개선됐다
+```
+
+측정하거나 화면으로 확인하지 않은 개선을 개선이라고 쓰지 않는다.
+
+제품이 테스트보다 앞선다. 테스트는 제품을 고정하는 수단이다.
+
+```text
+Product → Problem → Experiment → Engineering → Result
+```
+
+---
+
+## 2. Source of Truth
+
+대화보다 저장소 문서를 우선한다. 작업 전 현재 Phase 문서를 읽는다.
+
+```text
+docs/REQUIREMENTS.md   무엇을 만족해야 하는가
+docs/DESIGN.md         목표 / 현재 구조
+docs/ROADMAP.md        어떤 문제를 어떤 순서로 볼 것인가
+docs/TASKS.md          지금 무엇을 할 것인가
+docs/Poc.md            상태 그래프 하네스
+docs/adr/              왜 그 결정을 했는가
+docs/experiments/      측정 결과
+.agent/config.yaml     런타임 / 거버넌스
+.agent/artifacts/      현재 Task 산출물
+README.md              사람이 진입하는 방법
+```
+
+문서와 코드가 충돌하면 임의로 맞추지 않는다. 현재 구현을 보고 어떤 문서를 갱신할지 개발자에게 보고한다.
+
+목표가 REQUIREMENTS / ROADMAP / README와 달라 보이면 구현하지 않는다.
+
+---
+
+## 3. DESIGN은 코드와 맞춘다
+
+코드에 없는 미래 구조를 현재 Architecture처럼 쓰지 않는다.
+
+지금은 Phase 0→1 이전이므로 DESIGN에 목표 구조가 있다.
+Phase 1 코드가 생기면 DESIGN의 "현재"를 코드에 맞게 고친다.
+Redis / Kafka / Simulator는 ROADMAP에만 있고 코드에 없으면 현재 구조가 아니다.
+
+---
+
+## 4. 현재 Phase를 벗어나지 않는다
+
+`docs/TASKS.md`가 요구하지 않는 기능을 선제 구현하지 않는다.
+
+Phase 1에서 요청이 없으면 넣지 않는다.
+
+```text
+Redis, Kafka, Lua, Distributed Lock
+Traffic Simulator
+SSE / WebSocket
+k6 / Prometheus / Grafana
+Mock Ad Exchange
+Kubernetes / AWS / gRPC
+MongoDB
+운영 AI
+Frequency Cap / Budget의 동시성 해법
+```
+
+ROADMAP에 있다는 이유만으로 구현하지 않는다.
+
+---
+
+## 5. 문제를 해결하기 전에 재현한다
+
+잘못된 흐름:
+
+```text
+느릴 수 있다 → Redis
+이벤트가 많을 수 있다 → Kafka
+```
+
+선호하는 흐름:
+
+```text
+단순 구현으로 동작
+  ↓
+문제 재현
+  ↓
+측정
+  ↓
+후보 비교
+  ↓
+Human Gate
+  ↓
+ADR
+  ↓
+구현
+  ↓
+같은 조건 재확인
+```
+
+Race Condition은 코드 작성 단계에서 추측으로 예방하지 않는다.
+
+---
+
+## 6. 바이브 루프 (State Graph)
+
+구현 Task는 이 순서를 건너뛰지 않는다. 상세는 스킬 `ad-flow-vibe-coding`.
+
+```text
+0  Governance   .agent/config.yaml 확인 (없으면 보고 후 기본값 사용)
+1  Analysis     읽기 전용. artifacts/<task>/analysis.md
+2  Plan         TDD 명세. artifacts/<task>/plan.md → HITL STOP
+3A Red          실패하는 테스트. 실행해서 실패를 확인
+3B Green        최소 구현. 신규 파일만 전체 작성, 기존은 패치
+3C Lint         린트/컴파일 에러만 고침
+3D Refactor     행위 변경 없이. 테스트 유지
+4  Summary      TASKS/DESIGN/README 동기화. 커밋은 요청 시에만
+```
+
+Analysis 없이 코드를 쓰지 않는다.
+Plan HITL 승인 없이 프로덕션 코드를 쓰지 않는다.
+테스트가 실패하지 않았는데 Green으로 넘어가지 않는다. (가짜 테스트 반려)
+Green 실패 재시도는 `.agent/config.yaml`의 `max_retry_limit`을 넘기면 STOP하고 롤백 후보를 보고한다.
+
+이전 대화 전체를 다음 단계에 넣지 않는다. 산출물 파일만 기준으로 한다.
+
+---
+
+## 7. Human Gate
+
+바로 구현하지 않고 STOP한다.
+
+```text
+Redis / Kafka / 관측 스택 도입
+Lock / Lua 등 동시성 해법 선택
+Frequency Cap / Budget 완료 조건 변경
+Event 저장을 Serving과 분리
+Experiment Scenario의 비교 가능성 변경
+프로젝트 Scope / Phase 완료 조건 변경
+DESIGN에 없는 API 추가
+```
+
+보고 형식:
+
+```text
+현재 문제
+현재 측정 / 화면 상태
+원인 가설
+후보 A / B / C
+장점 / 단점
+추천안
+예상 Trade-off
+STOP
+```
+
+승인 전에 해당 변경을 구현하지 않는다. 승인 직후 ADR을 남긴다.
+
+---
+
+## 8. Test와 Experiment
+
+```text
+Test        코드가 기대대로 동작하는가
+Experiment  부하·동시성·중복에서 실제로 무엇이 일어나는가
+```
+
+Phase 1 완료 조건은 Test + Demo 경로다. Experiment가 아니다.
+
+---
+
+## 9. Git
+
+문제 재현과 해결을 한 커밋에 섞지 않는다.
+사용자가 커밋을 요청하기 전에는 커밋하지 않는다.
+
+---
+
+## 10. 작업 시작
+
+1. TASKS에서 현재 Task를 확인한다.
+2. REQUIREMENTS / DESIGN / ROADMAP의 관련 절을 확인한다.
+3. `.agent/config.yaml`을 확인한다.
+4. 스킬 `ad-flow-vibe-coding`을 따른다.
+5. 코드를 썼다는 이유만으로 Task를 DONE 하지 않는다.
