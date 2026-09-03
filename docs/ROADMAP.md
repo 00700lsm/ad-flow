@@ -80,7 +80,7 @@ Phase 1은 성능 실험이 아니다. 제품이 먼저다.
 
 ## Phase 1. 시연 가능한 제품 MVP
 
-상태: `IN PROGRESS`
+상태: `DONE`
 
 질문:
 
@@ -218,6 +218,6 @@ Legacy → New 점진 전환과 Shadow Traffic
 
 ```text
 Current Phase: Phase 1
-상태: IN PROGRESS
-다음 작업: docs/TASKS.md
+상태: DONE
+다음: Phase 2 동일 사용자 과다 노출. TASKS는 Phase 2를 열 때 갱신한다.
 ```

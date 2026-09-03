@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad Dashboard</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/console.html">Console</a>
+  <a href="/player.html">Player</a>
+  <a href="/dashboard.html">Dashboard</a>
+</nav>
+<main>
+  <h1>Ad Dashboard</h1>
+  <div class="panel">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>캠페인</th><th>노출</th><th>클릭</th><th>CTR</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="muted">3초마다 갱신한다. SSE는 Phase 1에 없다.</p>
+  </div>
+</main>
+<script>
+async function load() {
+  const data = await fetch('/dashboard/summary').then(r => r.json());
+  document.getElementById('rows').innerHTML = (data.campaigns || []).map(c =>
+    `<tr>
+      <td>${c.campaignId}</td>
+      <td>${c.name}</td>
+      <td>${c.impressions}</td>
+      <td>${c.clicks}</td>
+      <td>${(c.ctr * 100).toFixed(2)}%</td>
+    </tr>`
+  ).join('');
+}
+load();
+setInterval(load, 3000);
+</script>
+</body>
+</html>

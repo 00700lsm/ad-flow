@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Campaign Console</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/console.html">Console</a>
+  <a href="/player.html">Player</a>
+  <a href="/dashboard.html">Dashboard</a>
+</nav>
+<main>
+  <h1>Campaign Console</h1>
+  <div class="panel">
+    <form id="form">
+      <label>캠페인명</label>
+      <input name="name" value="아이폰 신제품 광고" required>
+      <div class="row">
+        <div>
+          <label>예산</label>
+          <input name="budget" type="number" value="50000" required>
+        </div>
+        <div>
+          <label>Priority</label>
+          <input name="priority" type="number" value="10" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>시작</label>
+          <input name="startAt" value="2026-01-01T00:00:00Z" required>
+        </div>
+        <div>
+          <label>종료</label>
+          <input name="endAt" value="2026-12-31T23:59:59Z" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>연령 최소</label>
+          <input name="targetAgeMin" type="number" value="20" required>
+        </div>
+        <div>
+          <label>연령 최대</label>
+          <input name="targetAgeMax" type="number" value="39" required>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>장르</label>
+          <input name="targetCategory" value="스포츠" required>
+        </div>
+        <div>
+          <label>Frequency Cap</label>
+          <input name="frequencyCap" type="number" value="2" required>
+        </div>
+      </div>
+      <label>소재 URL</label>
+      <input name="mediaUrl" value="/ads/iphone.svg" required>
+      <label>클릭 URL</label>
+      <input name="clickUrl" value="https://example.com/iphone" required>
+      <button type="submit">캠페인 생성</button>
+    </form>
+    <p id="result" class="muted"></p>
+  </div>
+  <div class="panel">
+    <h2>캠페인 목록</h2>
+    <table>
+      <thead><tr><th>ID</th><th>이름</th><th>상태</th><th>장르</th></tr></thead>
+      <tbody id="list"></tbody>
+    </table>
+  </div>
+</main>
+<script>
+async function load() {
+  const campaigns = await fetch('/campaigns').then(r => r.json());
+  document.getElementById('list').innerHTML = campaigns.map(c =>
+    `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.status}</td><td>${c.targetCategory}</td></tr>`
+  ).join('');
+}
+
+document.getElementById('form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  const created = await fetch('/campaigns', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: form.get('name'),
+      budget: Number(form.get('budget')),
+      startAt: form.get('startAt'),
+      endAt: form.get('endAt'),
+      priority: Number(form.get('priority')),
+      targetAgeMin: Number(form.get('targetAgeMin')),
+      targetAgeMax: Number(form.get('targetAgeMax')),
+      targetCategory: form.get('targetCategory'),
+      frequencyCap: Number(form.get('frequencyCap'))
+    })
+  }).then(r => r.json());
+  if (created.error) {
+    document.getElementById('result').textContent = created.error;
+    return;
+  }
+  await fetch(`/campaigns/${created.id}/creatives`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: 'CARD',
+      mediaUrl: form.get('mediaUrl'),
+      clickUrl: form.get('clickUrl')
+    })
+  });
+  document.getElementById('result').textContent = `생성됨: ${created.id} ${created.name}`;
+  load();
+});
+
+load();
+</script>
+</body>
+</html>

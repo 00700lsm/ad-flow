@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>OTT Player</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/console.html">Console</a>
+  <a href="/player.html">Player</a>
+  <a href="/dashboard.html">Dashboard</a>
+</nav>
+<main>
+  <h1>Mini TVING</h1>
+  <div class="panel">
+    <div class="row">
+      <div>
+        <label>사용자</label>
+        <select id="userId">
+          <option value="1">사용자 A · 28세 · 스포츠</option>
+          <option value="2">사용자 B · 45세 · 드라마</option>
+        </select>
+      </div>
+      <div>
+        <label>콘텐츠</label>
+        <select id="contentId">
+          <option value="1">축구 하이라이트 · 스포츠</option>
+          <option value="2">로맨스 드라마 · 드라마</option>
+        </select>
+      </div>
+    </div>
+    <button id="play">콘텐츠 재생</button>
+    <div class="player" id="screen">
+      <p class="muted">재생을 누르면 광고가 요청됩니다</p>
+    </div>
+    <p id="status" class="muted"></p>
+  </div>
+</main>
+<script>
+function uuid() {
+  return crypto.randomUUID();
+}
+
+document.getElementById('play').addEventListener('click', async () => {
+  const userId = Number(document.getElementById('userId').value);
+  const contentId = Number(document.getElementById('contentId').value);
+  const screen = document.getElementById('screen');
+  const status = document.getElementById('status');
+  const response = await fetch(`/ads?userId=${userId}&contentId=${contentId}`);
+  const ad = await response.json();
+  if (!response.ok) {
+    screen.innerHTML = `<p class="muted">${ad.error || '광고 없음'}</p>`;
+    status.textContent = '';
+    return;
+  }
+  screen.innerHTML = `
+    <img src="${ad.mediaUrl}" alt="${ad.campaignName}">
+    <button id="clickAd">광고 클릭</button>
+  `;
+  status.textContent = `노출: ${ad.campaignName}`;
+  await fetch('/events/impression', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventId: uuid(),
+      campaignId: ad.campaignId,
+      creativeId: ad.creativeId,
+      userId,
+      contentId
+    })
+  });
+  document.getElementById('clickAd').addEventListener('click', async () => {
+    await fetch('/events/click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventId: uuid(),
+        campaignId: ad.campaignId,
+        creativeId: ad.creativeId,
+        userId,
+        contentId
+      })
+    });
+    status.textContent = `클릭 기록: ${ad.campaignName}`;
+    window.open(ad.clickUrl, '_blank');
+  });
+});
+</script>
+</body>
+</html>

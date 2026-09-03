@@ -18,7 +18,7 @@ Analysis → Plan(HITL) → Red → Green → Lint → Refactor 순서를 따른
 ```text
 Phase 1
 시연 가능한 제품 MVP
-상태: IN PROGRESS
+상태: DONE
 ```
 
 목표:
@@ -52,7 +52,7 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 ## T1-01. Campaign Domain
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -63,7 +63,7 @@ ACTIVE / PAUSED 전이가 가능하다
 
 ## T1-02. Creative Domain
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -74,7 +74,7 @@ mediaUrl / clickUrl이 저장된다
 
 ## T1-03. Campaign CRUD API
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -86,7 +86,7 @@ POST /campaigns/{id}/creatives
 
 ## T1-04. User / Content 샘플
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -96,7 +96,7 @@ POST /campaigns/{id}/creatives
 
 ## T1-05. Ad Selection API
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -107,7 +107,7 @@ GET /ads?userId=&contentId=
 
 ## T1-06. Impression / Click API
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -119,7 +119,7 @@ Dashboard 집계의 입력이 된다
 
 ## T1-07. 기본 Dashboard API
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -131,7 +131,7 @@ GET /dashboard/summary
 
 ## T1-08. OTT Player / Campaign Console 화면
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -142,7 +142,7 @@ GET /dashboard/summary
 
 ## T1-09. Demo 경로 검증
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -155,9 +155,9 @@ DESIGN.md가 Phase 1 코드와 일치한다
 
 # 4. Phase 1 완료 조건
 
-- [ ] FR-01 ~ FR-08을 만족한다
-- [ ] Phase 2 기술을 미리 넣지 않았다
-- [ ] README로 Demo 경로를 따라갈 수 있다
-- [ ] DESIGN이 현재 코드와 맞다
+- [x] FR-01 ~ FR-08을 만족한다
+- [x] Phase 2 기술을 미리 넣지 않았다
+- [x] README로 Demo 경로를 따라갈 수 있다
+- [x] DESIGN이 현재 코드와 맞다
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

@@ -19,8 +19,8 @@ experiments/     → 실제 측정 결과
 
 이 문서는 Phase마다 새로 만들지 않는다. 프로젝트 전체에서 `DESIGN.md` 하나를 유지한다.
 
-코드가 없는 기능은 현재 구조로 적지 않는다. 지금은 구현 전이므로 아래는 **목표 구조**다.
-Phase 1 코드가 생기면 이 문서를 코드와 맞춘다.
+코드가 없는 기능은 현재 구조로 적지 않는다.
+7절의 Redis / Kafka 그림은 **목표**다. 현재 코드는 4절을 따른다.
 
 중요한 설계 변경의 이유는 `docs/adr/`, 실험 결과는 `docs/experiments/`에 기록한다.
 구현 루프는 `.cursor/rules/ad-flow.mdc`와 `.cursor/skills/ad-flow-vibe-coding/SKILL.md`다.
@@ -95,13 +95,37 @@ Current Phase
 
 Phase 1
 시연 가능한 제품 MVP
-코드: 구현 전
-하네스: READY
+코드: READY
 ```
 
-아래 아키텍처는 **목표 구조**다. Phase 1 MVP는 Campaign CRUD, 광고 선택, OTT Player, Impression / Click, 기본 Dashboard까지만 포함한다.
+현재 구조:
 
-Redis, Kafka, Simulator, 실시간 Dashboard, Mock Ad Exchange, Legacy Migration은 ROADMAP 단계에 도달하고 코드에 들어온 뒤에만 현재 구현으로 본다.
+```text
+Browser (console / player / dashboard-ui)
+  ↓
+Spring Boot
+  ├─ Campaign / Creative CRUD
+  ├─ Ad Selection (활성 / 기간 / 연령 / 장르 / Priority)
+  ├─ Impression / Click 동기 저장
+  └─ Dashboard 집계
+  ↓
+PostgreSQL
+```
+
+프론트는 Next.js가 아니라 Spring이 서빙하는 정적 HTML이다.
+이벤트는 Kafka 없이 같은 앱이 PostgreSQL에 저장한다.
+
+아직 코드에 없는 것:
+
+```text
+Redis
+Kafka
+Frequency Cap 필터
+Budget 차감 / BUDGET_EXHAUSTED
+Traffic Simulator
+SSE / WebSocket
+Mock Ad Exchange
+```
 
 ---
 

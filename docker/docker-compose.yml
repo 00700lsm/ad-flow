@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ad-flow-postgres
+    environment:
+      POSTGRES_DB: adflow
+      POSTGRES_USER: adflow
+      POSTGRES_PASSWORD: adflow
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adflow -d adflow"]
+      interval: 3s
+      timeout: 5s
+      retries: 10

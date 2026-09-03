@@ -31,15 +31,42 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ```text
 Phase 1
 시연 가능한 제품 MVP
-코드: 구현 전
-하네스: READY
+코드: READY
 ```
 
-첫 번째 목표는 성능이 아니다.
+Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click을 확인할 수 있다.
 
-Campaign Console에서 광고를 하나 생성하고, OTT Player를 실행했을 때 내가 만든 광고가 실제로 재생되게 만든다.
+Frequency Cap, Budget 동시성, Kafka, Simulator는 아직 넣지 않았다.
 
-여기까지 만든 뒤 Frequency Cap, Budget, Kafka, Simulator, 성능 실험을 순서대로 붙인다.
+---
+
+## 실행 방법
+
+Java 21과 Docker가 필요하다.
+
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21
+docker compose -f docker/docker-compose.yml up -d
+./gradlew test
+./gradlew bootRun
+```
+
+Postgres를 쓰지 않고 메모리 DB로 보려면:
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=mem'
+```
+
+브라우저:
+
+```text
+http://localhost:8080/              시작
+http://localhost:8080/console.html  캠페인 생성
+http://localhost:8080/player.html   광고 재생
+http://localhost:8080/dashboard.html 성과
+```
+
+샘플: 사용자 1(28세, 스포츠) + 콘텐츠 1(축구 하이라이트)에 스포츠 캠페인이 붙는다.
 
 ---
 
