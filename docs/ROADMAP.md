@@ -217,7 +217,8 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 1
-상태: DONE
-다음: Phase 2 동일 사용자 과다 노출. TASKS는 Phase 2를 열 때 갱신한다.
+Current Phase: Phase 2
+상태: IN_PROGRESS
+T2-01: DONE (순차 Frequency Cap)
+다음 Task: 개발자 요청 시
 ```

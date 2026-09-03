@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +85,76 @@ class AdSelectionTest {
         assertThat(selector.select(candidates, user, content, NOW)).isEmpty();
     }
 
+    @Test
+    void skipsCampaignWhenTodayImpressionsReachCap() {
+        Campaign capped = campaign("capped", 50, 20, 39, "스포츠", 2);
+        capped.assignId(1L);
+        Campaign other = campaign("other", 1, 20, 39, "스포츠", 2);
+        other.assignId(2L);
+
+        User user = new User(1L, 28, "스포츠");
+        Content content = new Content(1L, "축구 하이라이트", "스포츠");
+
+        Optional<SelectedAd> selected = selector.select(
+                List.of(
+                        new CampaignCreative(capped, creative(1L, "/capped.png")),
+                        new CampaignCreative(other, creative(2L, "/other.png"))
+                ),
+                user,
+                content,
+                NOW,
+                Map.of(1L, 2L)
+        );
+
+        assertThat(selected).isPresent();
+        assertThat(selected.get().campaignId()).isEqualTo(2L);
+    }
+
+    @Test
+    void allowsCampaignWhenTodayImpressionsBelowCap() {
+        Campaign campaign = campaign("target", 50, 20, 39, "스포츠", 2);
+        campaign.assignId(1L);
+
+        Optional<SelectedAd> selected = selector.select(
+                List.of(new CampaignCreative(campaign, creative(1L, "/a.png"))),
+                new User(1L, 28, "스포츠"),
+                new Content(1L, "축구 하이라이트", "스포츠"),
+                NOW,
+                Map.of(1L, 1L)
+        );
+
+        assertThat(selected).isPresent();
+        assertThat(selected.get().campaignId()).isEqualTo(1L);
+    }
+
+    @Test
+    void ignoresCapWhenFrequencyCapIsZero() {
+        Campaign unlimited = campaign("unlimited", 50, 20, 39, "스포츠", 0);
+        unlimited.assignId(1L);
+
+        Optional<SelectedAd> selected = selector.select(
+                List.of(new CampaignCreative(unlimited, creative(1L, "/a.png"))),
+                new User(1L, 28, "스포츠"),
+                new Content(1L, "축구 하이라이트", "스포츠"),
+                NOW,
+                Map.of(1L, 100L)
+        );
+
+        assertThat(selected).isPresent();
+        assertThat(selected.get().campaignId()).isEqualTo(1L);
+    }
+
+    private static Creative creative(long campaignId, String mediaUrl) {
+        Creative creative = Creative.attach(campaignId, "CARD", mediaUrl, "https://example.com");
+        creative.assignId(campaignId * 10);
+        return creative;
+    }
+
     private static Campaign campaign(String name, int priority, int ageMin, int ageMax, String category) {
+        return campaign(name, priority, ageMin, ageMax, category, 2);
+    }
+
+    private static Campaign campaign(String name, int priority, int ageMin, int ageMax, String category, int frequencyCap) {
         return Campaign.create(
                 name,
                 50_000L,
@@ -94,7 +164,7 @@ class AdSelectionTest {
                 ageMin,
                 ageMax,
                 category,
-                2
+                frequencyCap
         );
     }
 }

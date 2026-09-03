@@ -37,6 +37,7 @@ Budget / Frequency Cap 동시성 제어 방식
 Source of Truth와 Realtime Counter를 나눌지
 프로젝트 Scope 변경
 Phase 완료 조건을 바꿀지
+한 요청에서 다룰 Task 범위
 ```
 
 ---

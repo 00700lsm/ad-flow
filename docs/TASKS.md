@@ -11,27 +11,43 @@
 구현은 `.cursor/skills/ad-flow-vibe-coding/SKILL.md`의
 Analysis → Plan(HITL) → Red → Green → Lint → Refactor 순서를 따른다.
 
+Phase 2 Task는 이 문서를 열 때 적는다. FR-09 전체를 한 Task로 구현하지 않는다.
+
+한 요청의 단위는 이 문서의 **Task 하나**다.
+Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`.
+
+에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
+
+```text
+현재 Task: 없음
+Phase 2: IN_PROGRESS
+T2-01: DONE
+다음: 개발자가 요청할 때 Phase 2의 다음 Task Analysis
+```
+
 ---
 
 # 1. 현재 Phase
 
 ```text
-Phase 1
-시연 가능한 제품 MVP
-상태: DONE
+Phase 2
+동일 사용자 과다 노출
+상태: IN_PROGRESS
 ```
 
 목표:
 
-Campaign Console에서 광고를 생성하고, OTT Player에서 해당 광고가 노출되며, Dashboard에서 Impression과 Click을 확인한다.
+같은 사용자가 같은 광고를 하루 N번 넘게 보지 않게 한다. T2-01은 순차 GET/INCR만 다룬다.
+
+Phase 1은 DONE이다.
 
 ---
 
 # 2. 이 Phase에서 하지 않는 것
 
 ```text
-Redis / Kafka
-Frequency Cap 동시성 해결
+Redis / Kafka / Lua / Distributed Lock
+Frequency Cap Race 해법 (T2-01 아님)
 Budget Overspending 해결
 Traffic Simulator API
 SSE / WebSocket
@@ -49,6 +65,19 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T2-01. Frequency Cap 순차 GET/INCR
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+동일 userId + campaignId의 당일 Impression이 frequencyCap에 도달하면
+GET /ads가 그 캠페인을 고르지 않는다
+다른 후보가 있으면 그 광고를 고른다
+Redis / Lock / 동시성 보장은 포함하지 않는다
+```
 
 ## T1-01. Campaign Domain
 
@@ -153,11 +182,19 @@ DESIGN.md가 Phase 1 코드와 일치한다
 
 ---
 
-# 4. Phase 1 완료 조건
+# 4. Phase 완료 조건
+
+Phase 1:
 
 - [x] FR-01 ~ FR-08을 만족한다
 - [x] Phase 2 기술을 미리 넣지 않았다
 - [x] README로 Demo 경로를 따라갈 수 있다
 - [x] DESIGN이 현재 코드와 맞다
+
+Phase 2:
+
+- [x] T2-01 순차 Frequency Cap
+- [ ] FR-09 동시 요청 한도 (Race 재현 후 Human Gate)
+- [ ] Player에서 캡 이후 광고가 바뀌는 것을 확인
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

@@ -29,14 +29,16 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 1
-시연 가능한 제품 MVP
-코드: READY
+Phase 2
+동일 사용자 과다 노출
+T2-01 순차 Frequency Cap: READY
+Race / Redis: 아직 없음
 ```
 
 Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click을 확인할 수 있다.
 
-Frequency Cap, Budget 동시성, Kafka, Simulator는 아직 넣지 않았다.
+같은 사용자의 당일 Impression이 Frequency Cap에 도달하면 `GET /ads`는 그 캠페인을 고르지 않는다.
+동시 요청 한도와 Redis는 아직 넣지 않았다. Budget, Kafka, Simulator도 없다.
 
 ---
 
@@ -496,7 +498,13 @@ AGENTS.md                                    에이전트 진입점
 docs/Poc.md                                  상태 그래프 철학
 ```
 
-현재 작업은 `docs/TASKS.md`다. Plan 승인 전에 프로덕션 코드를 넣지 않는다.
+새 대화에서 개발자가 말할 것:
+
+```text
+다음
+```
+
+에이전트가 TASKS 포인터와 문서를 연다. 경로를 나열하지 않아도 된다.
 
 ---
 

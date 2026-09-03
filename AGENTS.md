@@ -1,6 +1,7 @@
 # AdFlow
 
 에이전트는 이 저장소의 문서를 대화보다 우선한다.
+사용자는 파일 경로를 적지 않는다. `다음` / `승인` / Task ID면 충분하다.
 
 ```text
 규칙     .cursor/rules/ad-flow.mdc
@@ -14,6 +15,6 @@
 산출물   .agent/artifacts/
 ```
 
-Phase 1 완료 전 Redis / Kafka / 부하 도구를 넣지 않는다.
 Plan HITL 없이 프로덕션 코드를 쓰지 않는다.
+한 요청에서 Task 하나만 진행한다. Phase 전체를 구현하지 않는다.
 커밋은 사용자가 요청할 때만 한다.

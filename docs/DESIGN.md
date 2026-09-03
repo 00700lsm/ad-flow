@@ -93,9 +93,9 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 1
-시연 가능한 제품 MVP
-코드: READY
+Phase 2
+동일 사용자 과다 노출
+코드: T2-01 READY (순차 Frequency Cap)
 ```
 
 현재 구조:
@@ -105,8 +105,8 @@ Browser (console / player / dashboard-ui)
   ↓
 Spring Boot
   ├─ Campaign / Creative CRUD
-  ├─ Ad Selection (활성 / 기간 / 연령 / 장르 / Priority)
-  ├─ Impression / Click 동기 저장
+  ├─ Ad Selection (활성 / 기간 / 연령 / 장르 / Priority / 순차 Frequency Cap)
+  ├─ Impression / Click 동기 저장  ← 당일 노출 GET의 카운터
   └─ Dashboard 집계
   ↓
 PostgreSQL
@@ -114,13 +114,15 @@ PostgreSQL
 
 프론트는 Next.js가 아니라 Spring이 서빙하는 정적 HTML이다.
 이벤트는 Kafka 없이 같은 앱이 PostgreSQL에 저장한다.
+Frequency Cap은 당일(UTC) IMPRESSION 건수를 세고, cap에 도달한 캠페인을 `GET /ads`에서 뺀다.
+서빙 시점에 INCR하지 않는다.
 
 아직 코드에 없는 것:
 
 ```text
 Redis
 Kafka
-Frequency Cap 필터
+Frequency Cap 동시성 보장
 Budget 차감 / BUDGET_EXHAUSTED
 Traffic Simulator
 SSE / WebSocket

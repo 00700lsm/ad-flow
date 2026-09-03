@@ -2,9 +2,10 @@
 name: ad-flow-vibe-coding
 description: >-
   AdFlow 바이브 코딩 상태 그래프. Campaign/Creative/Ad Serving/Event/Dashboard
-  구현, 테스트 추가, 리팩터링, "만들어줘", "추가해줘", "구현해줘"에 사용한다.
-  Analysis·Plan HITL·Red-Green-Refactor를 건너뛰지 않고, Redis/Kafka를
-  Phase 1에 선제 도입하지 않는다.
+  "다음", "진행", "만들어줘", "추가해줘", "구현해줘"에 사용한다.
+  사용자가 문서 경로를 대지 않아도 TASKS에서 현재 Task를 연다.
+  Analysis·Plan HITL·Red-Green-Refactor를 건너뛰지 않고, Task 하나 단위로만
+  진행한다. Redis/Kafka를 선제 도입하지 않는다.
 ---
 
 # AdFlow 바이브코딩
@@ -18,6 +19,15 @@ description: >-
 
 - Phase 1: 만든 광고가 Player에 나오고 Dashboard에 이벤트가 남는다
 - 그다음: 과다 노출, 예산 초과, 이벤트 결합, 중복 정산을 **재현하고** 고친다
+
+한 요청에서 Task 하나만 한다. `docs/adr/001-one-task-at-a-time.md`.
+사용자는 `다음` 또는 Task ID만 말해도 된다. 문서 목록을 요구하지 않는다.
+
+```text
+"Phase N 진행해줘" → 다음 TODO의 Analysis / Plan 까지
+Plan 승인 → 그 Task의 Red/Green/Summary 까지
+Summary 후 STOP. 다음 Task는 새 요청
+```
 
 ## 하드 제약
 
@@ -65,8 +75,9 @@ Frequency Cap / Budget 동시성 해법
    행위 변경 없이. 테스트가 깨지면 되돌린다.
 
 4. Summary
-   TASKS 상태, 필요 시 DESIGN/README를 코드에 맞춘다.
+   그 Task만 TASKS/DESIGN을 맞춘다.
    커밋은 사용자가 요청할 때만.
+   다음 Task로 넘어가지 않고 STOP한다.
 ```
 
 대화 전체를 다음 단계에 복사하지 않는다. `analysis.md` / `plan.md` / 테스트 결과만 사용한다.
