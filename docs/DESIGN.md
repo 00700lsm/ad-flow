@@ -95,7 +95,7 @@ Current Phase
 
 Phase 2
 동일 사용자 과다 노출
-코드: T2-01 READY (순차 Frequency Cap)
+코드: T2-01 순차 Frequency Cap. T2-02 Race 재현됨 (해법 없음)
 ```
 
 현재 구조:
@@ -116,6 +116,7 @@ PostgreSQL
 이벤트는 Kafka 없이 같은 앱이 PostgreSQL에 저장한다.
 Frequency Cap은 당일(UTC) IMPRESSION 건수를 세고, cap에 도달한 캠페인을 `GET /ads`에서 뺀다.
 서빙 시점에 INCR하지 않는다.
+동시 GET 후 Impression이면 당일 건수가 cap을 넘을 수 있다. T2-02 측정: requests=16 selected=16 impressions=16 cap=1 overflow=15.
 
 아직 코드에 없는 것:
 

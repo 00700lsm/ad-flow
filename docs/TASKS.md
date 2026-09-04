@@ -22,8 +22,8 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 현재 Task: T2-02
 Phase 2: IN_PROGRESS
 T2-01: DONE
-T2-02: Plan HITL 대기
-다음: 승인 후 Frequency Cap Race 재현 테스트만
+T2-02: DONE (Race 재현)
+다음: Human Gate. 해법은 승인 전 구현하지 않음
 ```
 
 ---
@@ -69,7 +69,7 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 ## T2-02. Frequency Cap Race 재현
 
-상태: `TODO` (Plan HITL)
+상태: `DONE`
 
 완료 조건:
 
