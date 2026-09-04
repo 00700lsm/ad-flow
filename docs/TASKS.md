@@ -19,12 +19,12 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T2-02
+현재 Task: T2-03
 Phase 2: IN_PROGRESS
 T2-01: DONE
 T2-02: DONE (Race 재현)
-Human Gate: 보류 (A/B/C 미선택)
-다음: 해법 Task 없음. 개발자가 선택을 재개할 때만
+Human Gate: A 선택 (PostgreSQL 원자적 INCR). Redis 아님
+다음: T2-03 Plan HITL. 승인 전 구현 없음
 ```
 
 ---
@@ -39,7 +39,7 @@ Phase 2
 
 목표:
 
-같은 사용자가 같은 광고를 하루 N번 넘게 보지 않게 한다. T2-01은 순차 GET/INCR만 다룬다.
+같은 사용자가 같은 광고를 하루 N번 넘게 보지 않게 한다. T2-03은 선택 시점 원자적 INCR(ADR 003)만 다룬다.
 
 Phase 1은 DONE이다.
 
@@ -49,7 +49,7 @@ Phase 1은 DONE이다.
 
 ```text
 Redis / Kafka / Lua / Distributed Lock
-Frequency Cap Race 해법 (T2-01 아님)
+후보 B / 후보 C
 Budget Overspending 해결
 Traffic Simulator API
 SSE / WebSocket
@@ -67,6 +67,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T2-03. Frequency Cap 선택 시점 원자적 INCR
+
+상태: `TODO`
+
+완료 조건:
+
+```text
+동시 GET /ads에서 당일 캡 카운터가 frequencyCap을 넘지 않는다
+카운터는 PostgreSQL에서 GET 시 원자적으로 오른다
+Impression은 캡 카운터가 아니다
+Redis / Lua / 후보 B / C 는 포함하지 않는다
+Player 확인은 포함하지 않는다
+```
 
 ## T2-02. Frequency Cap Race 재현
 
@@ -210,7 +224,7 @@ Phase 1:
 Phase 2:
 
 - [x] T2-01 순차 Frequency Cap
-- [ ] FR-09 동시 요청 한도 (Race 재현됨, Human Gate 보류)
+- [ ] FR-09 동시 요청 한도 (T2-03 Plan HITL)
 - [ ] Player에서 캡 이후 광고가 바뀌는 것을 확인
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

@@ -221,6 +221,6 @@ Current Phase: Phase 2
 상태: IN_PROGRESS
 T2-01: DONE (순차 Frequency Cap)
 T2-02: DONE (Race 재현)
-Human Gate: 보류
-다음 Task: 개발자가 해법 선택을 재개할 때만
+Human Gate: A (ADR 003, PostgreSQL)
+다음 Task: T2-03 Plan HITL
 ```
