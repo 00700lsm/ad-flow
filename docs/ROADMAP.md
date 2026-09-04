@@ -220,5 +220,7 @@ Legacy → New 점진 전환과 Shadow Traffic
 Current Phase: Phase 2
 상태: IN_PROGRESS
 T2-01: DONE (순차 Frequency Cap)
-다음 Task: 개발자 요청 시
+T2-02: DONE (Race 재현)
+Human Gate: 보류
+다음 Task: 개발자가 해법 선택을 재개할 때만
 ```

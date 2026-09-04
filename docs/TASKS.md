@@ -23,7 +23,8 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 Phase 2: IN_PROGRESS
 T2-01: DONE
 T2-02: DONE (Race 재현)
-다음: Human Gate. 해법은 승인 전 구현하지 않음
+Human Gate: 보류 (A/B/C 미선택)
+다음: 해법 Task 없음. 개발자가 선택을 재개할 때만
 ```
 
 ---
@@ -209,7 +210,7 @@ Phase 1:
 Phase 2:
 
 - [x] T2-01 순차 Frequency Cap
-- [ ] FR-09 동시 요청 한도 (Race 재현 후 Human Gate)
+- [ ] FR-09 동시 요청 한도 (Race 재현됨, Human Gate 보류)
 - [ ] Player에서 캡 이후 광고가 바뀌는 것을 확인
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
