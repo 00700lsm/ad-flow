@@ -19,10 +19,11 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: 없음
+현재 Task: T2-02
 Phase 2: IN_PROGRESS
 T2-01: DONE
-다음: 개발자가 요청할 때 Phase 2의 다음 Task Analysis
+T2-02: Plan HITL 대기
+다음: 승인 후 Frequency Cap Race 재현 테스트만
 ```
 
 ---
@@ -65,6 +66,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T2-02. Frequency Cap Race 재현
+
+상태: `TODO` (Plan HITL)
+
+완료 조건:
+
+```text
+동일 userId로 동시 GET /ads + Impression 시
+당일 IMPRESSION이 frequencyCap을 넘는 경우가 테스트로 재현된다
+초과분을 측정한다
+Redis / Lock / Lua 해법은 포함하지 않는다
+Human Gate 전에 한도 준수로 고치지 않는다
+```
 
 ## T2-01. Frequency Cap 순차 GET/INCR
 
