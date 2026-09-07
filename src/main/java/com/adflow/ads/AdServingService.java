@@ -6,8 +6,6 @@ import com.adflow.content.Content;
 import com.adflow.content.ContentRepository;
 import com.adflow.creative.Creative;
 import com.adflow.creative.CreativeRepository;
-import com.adflow.event.AdEventRepository;
-import com.adflow.event.AdEventType;
 import com.adflow.user.User;
 import com.adflow.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +15,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +26,7 @@ public class AdServingService {
     private final CreativeRepository creatives;
     private final UserRepository users;
     private final ContentRepository contents;
-    private final AdEventRepository events;
+    private final FrequencyCapCounter frequencyCaps;
     private final AdSelector selector = new AdSelector();
 
     public AdServingService(
@@ -37,16 +34,16 @@ public class AdServingService {
             CreativeRepository creatives,
             UserRepository users,
             ContentRepository contents,
-            AdEventRepository events
+            FrequencyCapCounter frequencyCaps
     ) {
         this.campaigns = campaigns;
         this.creatives = creatives;
         this.users = users;
         this.contents = contents;
-        this.events = events;
+        this.frequencyCaps = frequencyCaps;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public SelectedAd select(Long userId, Long contentId) {
         User user = users.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
@@ -58,38 +55,36 @@ public class AdServingService {
                 .collect(Collectors.groupingBy(Creative::getCampaignId));
 
         Instant now = Instant.now();
-        Map<Long, Long> todayImpressions = todayImpressions(userId, all, now);
+        LocalDate utcDay = now.atZone(ZoneOffset.UTC).toLocalDate();
 
-        List<CampaignCreative> candidates = new ArrayList<>();
+        List<CampaignCreative> remaining = new ArrayList<>();
         for (Campaign campaign : all) {
             List<Creative> campaignCreatives = byCampaign.getOrDefault(campaign.getId(), List.of());
             for (Creative creative : campaignCreatives) {
-                candidates.add(new CampaignCreative(campaign, creative));
+                remaining.add(new CampaignCreative(campaign, creative));
             }
         }
 
-        return selector.select(candidates, user, content, now, todayImpressions)
-                .orElseThrow(() -> new AdNotFoundException("조건에 맞는 광고가 없습니다"));
+        while (!remaining.isEmpty()) {
+            SelectedAd selected = selector.select(remaining, user, content, now, Map.of())
+                    .orElseThrow(() -> new AdNotFoundException("조건에 맞는 광고가 없습니다"));
+            Campaign campaign = campaignOf(remaining, selected.campaignId());
+            if (campaign.getFrequencyCap() <= 0
+                    || frequencyCaps.tryIncrement(userId, campaign.getId(), utcDay, campaign.getFrequencyCap())) {
+                return selected;
+            }
+            remaining = remaining.stream()
+                    .filter(item -> !item.campaign().getId().equals(campaign.getId()))
+                    .collect(Collectors.toList());
+        }
+        throw new AdNotFoundException("조건에 맞는 광고가 없습니다");
     }
 
-    private Map<Long, Long> todayImpressions(Long userId, List<Campaign> all, Instant now) {
-        LocalDate day = now.atZone(ZoneOffset.UTC).toLocalDate();
-        Instant start = day.atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant end = day.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-
-        Map<Long, Long> counts = new HashMap<>();
-        for (Campaign campaign : all) {
-            long count = events.countByUserIdAndCampaignIdAndTypeAndOccurredAtGreaterThanEqualAndOccurredAtLessThan(
-                    userId,
-                    campaign.getId(),
-                    AdEventType.IMPRESSION,
-                    start,
-                    end
-            );
-            if (count > 0) {
-                counts.put(campaign.getId(), count);
-            }
-        }
-        return counts;
+    private static Campaign campaignOf(List<CampaignCreative> remaining, Long campaignId) {
+        return remaining.stream()
+                .map(CampaignCreative::campaign)
+                .filter(campaign -> campaign.getId().equals(campaignId))
+                .findFirst()
+                .orElseThrow(() -> new AdNotFoundException("조건에 맞는 광고가 없습니다"));
     }
 }

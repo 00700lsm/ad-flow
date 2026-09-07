@@ -1,23 +1,19 @@
 package com.adflow.web;
 
-import com.adflow.event.AdEventRepository;
-import com.adflow.event.AdEventType;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,25 +39,20 @@ class FrequencyCapRaceTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private AdEventRepository events;
+    private JdbcTemplate jdbcTemplate;
 
     private final JsonMapper json = JsonMapper.builder().build();
 
     @Test
-    void concurrentSelectThenImpressionExceedsCap() throws Exception {
+    void concurrentSelectDoesNotExceedCap() throws Exception {
         int campaignId = createCampaign("race-cap", 100, CAP);
         addCreative(campaignId, "/race.png");
 
         AtomicInteger selected = new AtomicInteger();
-        AtomicInteger impressionsPosted = new AtomicInteger();
-        int[] campaignIds = new int[THREADS];
-        int[] creativeIds = new int[THREADS];
         int[] statuses = new int[THREADS];
 
         CountDownLatch startGet = new CountDownLatch(1);
         CountDownLatch getsDone = new CountDownLatch(THREADS);
-        CountDownLatch startPost = new CountDownLatch(1);
-        CountDownLatch postsDone = new CountDownLatch(THREADS);
 
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
         try {
@@ -77,9 +68,6 @@ class FrequencyCapRaceTest {
                         int status = getResult.getResponse().getStatus();
                         statuses[index] = status;
                         if (status == 200) {
-                            var body = json.readTree(getResult.getResponse().getContentAsString());
-                            campaignIds[index] = body.get("campaignId").asInt();
-                            creativeIds[index] = body.get("creativeId").asInt();
                             selected.incrementAndGet();
                         }
                     } catch (Exception e) {
@@ -87,63 +75,30 @@ class FrequencyCapRaceTest {
                     } finally {
                         getsDone.countDown();
                     }
-                    try {
-                        startPost.await();
-                        if (statuses[index] == 200) {
-                            mockMvc.perform(post("/events/impression")
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content("""
-                                                    {
-                                                      "eventId": "race-%d",
-                                                      "campaignId": %d,
-                                                      "creativeId": %d,
-                                                      "userId": %d,
-                                                      "contentId": %d
-                                                    }
-                                                    """.formatted(
-                                                    index,
-                                                    campaignIds[index],
-                                                    creativeIds[index],
-                                                    USER_ID,
-                                                    CONTENT_ID)))
-                                    .andExpect(status().isCreated());
-                            impressionsPosted.incrementAndGet();
-                        }
-                    } catch (Exception ignored) {
-                    } finally {
-                        postsDone.countDown();
-                    }
                 });
             }
 
             startGet.countDown();
             assertThat(getsDone.await(30, TimeUnit.SECONDS)).isTrue();
-            startPost.countDown();
-            assertThat(postsDone.await(30, TimeUnit.SECONDS)).isTrue();
         } finally {
             pool.shutdownNow();
         }
 
-        Instant now = Instant.now();
-        LocalDate day = now.atZone(ZoneOffset.UTC).toLocalDate();
-        Instant start = day.atStartOfDay(ZoneOffset.UTC).toInstant();
-        Instant end = day.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-        long todayImpressions = events.countByUserIdAndCampaignIdAndTypeAndOccurredAtGreaterThanEqualAndOccurredAtLessThan(
-                USER_ID,
-                (long) campaignId,
-                AdEventType.IMPRESSION,
-                start,
-                end
+        long todayCap = todayCapCount(USER_ID, campaignId);
+        assertThat(selected.get()).isLessThanOrEqualTo(CAP);
+        assertThat(todayCap).isLessThanOrEqualTo(CAP);
+    }
+
+    private long todayCapCount(long userId, long campaignId) {
+        LocalDate day = LocalDate.now(ZoneOffset.UTC);
+        List<Long> rows = jdbcTemplate.query(
+                "select cap_count from frequency_cap_counts where user_id = ? and campaign_id = ? and utc_day = ?",
+                (rs, rowNum) -> rs.getLong(1),
+                userId,
+                campaignId,
+                day
         );
-        long overflow = todayImpressions - CAP;
-
-        String line = "requests=%d selected=%d impressions=%d cap=%d overflow=%d".formatted(
-                THREADS, selected.get(), todayImpressions, CAP, overflow);
-        Files.writeString(Path.of(".agent/artifacts/T2-02/measurement.txt"), line + "\n", StandardCharsets.UTF_8);
-
-        assertThat(todayImpressions)
-                .as(line)
-                .isGreaterThan(CAP);
+        return rows.isEmpty() ? 0 : rows.getFirst();
     }
 
     private int createCampaign(String name, int priority, int frequencyCap) throws Exception {

@@ -19,12 +19,12 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T2-03
+현재 Task: T2-03 DONE
 Phase 2: IN_PROGRESS
 T2-01: DONE
 T2-02: DONE (Race 재현)
-Human Gate: A 선택 (PostgreSQL 원자적 INCR). Redis 아님
-다음: T2-03 Plan HITL. 승인 전 구현 없음
+T2-03: DONE (선택 시점 원자적 INCR)
+다음: Player에서 캡 이후 광고 변경 확인. 새 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -70,7 +70,7 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 ## T2-03. Frequency Cap 선택 시점 원자적 INCR
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -224,7 +224,7 @@ Phase 1:
 Phase 2:
 
 - [x] T2-01 순차 Frequency Cap
-- [ ] FR-09 동시 요청 한도 (T2-03 Plan HITL)
+- [x] FR-09 동시 요청 한도 (T2-03 테스트)
 - [ ] Player에서 캡 이후 광고가 바뀌는 것을 확인
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

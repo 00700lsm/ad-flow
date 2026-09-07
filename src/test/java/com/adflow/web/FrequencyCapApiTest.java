@@ -6,9 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -23,21 +29,24 @@ class FrequencyCapApiTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private final JsonMapper json = JsonMapper.builder().build();
 
     @Test
     void afterCapReached_selectsOtherCampaign() throws Exception {
         int high = createCampaign("high", 20, 2);
-        int highCreative = addCreative(high, "/high.png");
+        addCreative(high, "/high.png");
         int low = createCampaign("low", 1, 2);
         int lowCreative = addCreative(low, "/low.png");
 
         mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.campaignId", is(high)));
-
-        postImpression("imp-1", high, highCreative, 1, null);
-        postImpression("imp-2", high, highCreative, 1, null);
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(high)));
 
         mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
                 .andExpect(status().isOk())
@@ -46,23 +55,64 @@ class FrequencyCapApiTest {
     }
 
     @Test
-    void countsOnlySameUserCampaignAndUtcDay() throws Exception {
-        int campaignId = createCampaign("capped", 20, 2);
-        int creativeId = addCreative(campaignId, "/a.png");
-
-        postImpression("other-user", campaignId, creativeId, 2, null);
-        postClick("clk-1", campaignId, creativeId, 1);
-        postImpression("yesterday", campaignId, creativeId, 1, "2020-01-01T00:00:00Z");
+    void frequencyCapZero_doesNotIncrementAndKeepsSelecting() throws Exception {
+        int campaignId = createCampaign("unlimited", 20, 0);
+        addCreative(campaignId, "/u.png");
 
         mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.campaignId", is(campaignId)));
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(campaignId)));
 
+        assertThat(todayCapCount(1L, campaignId)).isZero();
+    }
+
+    @Test
+    void countsOnlySameUserCampaignAndUtcDay() throws Exception {
+        int campaignId = createCampaign("capped", 20, 2);
+        int creativeId = addCreative(campaignId, "/a.png");
+
+        insertCapCount(2L, campaignId, LocalDate.now(ZoneOffset.UTC), 10);
+        insertCapCount(1L, campaignId, LocalDate.of(2020, 1, 1), 10);
+
+        postImpression("other-user", campaignId, creativeId, 2, null);
+        postClick("clk-1", campaignId, creativeId, 1);
+        postImpression("yesterday", campaignId, creativeId, 1, "2020-01-01T00:00:00Z");
         postImpression("today-1", campaignId, creativeId, 1, null);
         postImpression("today-2", campaignId, creativeId, 1, null);
 
         mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(campaignId)));
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(campaignId)));
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
                 .andExpect(status().isNotFound());
+    }
+
+    private long todayCapCount(long userId, long campaignId) {
+        LocalDate day = LocalDate.now(ZoneOffset.UTC);
+        List<Long> rows = jdbcTemplate.query(
+                "select cap_count from frequency_cap_counts where user_id = ? and campaign_id = ? and utc_day = ?",
+                (rs, rowNum) -> rs.getLong(1),
+                userId,
+                campaignId,
+                day
+        );
+        return rows.isEmpty() ? 0 : rows.getFirst();
+    }
+
+    private void insertCapCount(long userId, long campaignId, LocalDate utcDay, int count) {
+        jdbcTemplate.update(
+                "insert into frequency_cap_counts (user_id, campaign_id, utc_day, cap_count) values (?, ?, ?, ?)",
+                userId,
+                campaignId,
+                utcDay,
+                count
+        );
     }
 
     private int createCampaign(String name, int priority, int frequencyCap) throws Exception {

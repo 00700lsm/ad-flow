@@ -95,7 +95,7 @@ Current Phase
 
 Phase 2
 동일 사용자 과다 노출
-코드: T2-01 순차 Frequency Cap. T2-02 Race 재현됨 (해법 없음)
+코드: T2-03 선택 시점 원자적 INCR (PostgreSQL). Player 확인은 남음
 ```
 
 현재 구조:
@@ -105,25 +105,26 @@ Browser (console / player / dashboard-ui)
   ↓
 Spring Boot
   ├─ Campaign / Creative CRUD
-  ├─ Ad Selection (활성 / 기간 / 연령 / 장르 / Priority / 순차 Frequency Cap)
-  ├─ Impression / Click 동기 저장  ← 당일 노출 GET의 카운터
+  ├─ Ad Selection (활성 / 기간 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap)
+  ├─ Impression / Click 동기 저장  ← Dashboard 집계. 캡 카운터가 아님
   └─ Dashboard 집계
   ↓
 PostgreSQL
+  └─ frequency_cap_counts (userId, campaignId, UTC day)
 ```
 
 프론트는 Next.js가 아니라 Spring이 서빙하는 정적 HTML이다.
 이벤트는 Kafka 없이 같은 앱이 PostgreSQL에 저장한다.
-Frequency Cap은 당일(UTC) IMPRESSION 건수를 세고, cap에 도달한 캠페인을 `GET /ads`에서 뺀다.
-서빙 시점에 INCR하지 않는다.
-동시 GET 후 Impression이면 당일 건수가 cap을 넘을 수 있다. T2-02 측정: requests=16 selected=16 impressions=16 cap=1 overflow=15.
+Frequency Cap 카운터는 `GET /ads`가 후보를 고를 때 `count < cap`인 행만 원자적으로 +1 한다.
+실패하면 다음 우선순위 캠페인을 시도한다. `frequencyCap = 0`은 올리지 않는다.
+Impression INSERT는 캡을 채우지 않는다. GET만 해도 슬롯은 줄어든다 (ADR 003).
+T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=15.
 
 아직 코드에 없는 것:
 
 ```text
 Redis
 Kafka
-Frequency Cap 동시성 보장
 Budget 차감 / BUDGET_EXHAUSTED
 Traffic Simulator
 SSE / WebSocket
@@ -626,25 +627,19 @@ Campaign Console에서 광고를 생성하고, OTT Player에서 해당 광고가
 
 동일한 사용자는 동일한 광고를 하루 최대 N번까지만 볼 수 있다.
 
-초기 구현:
+현재 코드:
 
 ```text
-GET frequency
-
-if frequency < cap
-    INCR frequency
+GET /ads
+  후보를 Priority 순으로
+  count < cap 이면 PostgreSQL에서 원자적 +1
+  실패하면 다음 후보
 ```
 
-동시 요청에서 Race Condition이 발생할 수 있다.
+T2-02에서 동시 GET+Impression Race를 재현했다.
+T2-03에서 선택 시점 원자적 INCR로 동시 GET 한도를 테스트로 고정했다 (ADR 003). Redis / Lua는 쓰지 않는다.
 
-개선 후보:
-
-```text
-Redis Atomic Operation
-Lua Script
-```
-
-결과는 OTT Player에서 동일 광고가 더 이상 노출되지 않는 형태로 직접 확인한다.
+결과는 OTT Player에서 동일 광고가 더 이상 노출되지 않는 형태로 직접 확인한다. 이 확인은 아직 남았다.
 
 ## 12.3 Phase 3. Budget Control
 
@@ -839,7 +834,8 @@ Lua Script
 한 사용자는 하루 최대 3회 노출
 ```
 
-동시 요청을 발생시켜 3회를 초과하는 상황을 재현한 뒤 Redis 기반 원자적 연산으로 해결한다.
+T2-02에서 동시 요청이 cap을 넘는 것을 재현했다.
+T2-03에서 PostgreSQL 선택 시점 원자적 INCR로 한도를 고정했다. Redis는 쓰지 않았다.
 
 ## 13.4 Experiment 4. Kafka Event Duplication
 
