@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T3-01 Plan HITL
+현재 Task: T3-01 DONE
 Phase 3: IN PROGRESS
 T2-01 ~ T2-04: DONE
-다음: T3-01 승인 후 Red
+다음: Phase 3 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -69,7 +69,7 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 ## T3-01. Budget 순차 차감
 
-상태: `TODO` (Plan HITL)
+상태: `DONE`
 
 완료 조건:
 

@@ -93,6 +93,30 @@ class CampaignTest {
         assertThat(campaign.isActiveAt(inside)).isFalse();
     }
 
+    @Test
+    void chargeImpression_incrementsSpentAndExhaustsWhenReached() {
+        Campaign campaign = Campaign.create(
+                "소진",
+                2L,
+                START,
+                END,
+                10,
+                20,
+                39,
+                "스포츠",
+                2
+        );
+
+        campaign.chargeImpression();
+        assertThat(campaign.getSpentBudget()).isEqualTo(1L);
+        assertThat(campaign.getStatus()).isEqualTo(CampaignStatus.ACTIVE);
+
+        campaign.chargeImpression();
+        assertThat(campaign.getSpentBudget()).isEqualTo(2L);
+        assertThat(campaign.getStatus()).isEqualTo(CampaignStatus.BUDGET_EXHAUSTED);
+        assertThat(campaign.hasRemainingBudget()).isFalse();
+    }
+
     private static Campaign sample() {
         return Campaign.create(
                 "아이폰 신제품 광고",

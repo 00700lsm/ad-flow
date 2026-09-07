@@ -128,6 +128,60 @@ class AdSelectionTest {
     }
 
     @Test
+    void skipsCampaignWhenSpentBudgetReachesBudget() {
+        Campaign exhausted = campaign("exhausted", 50, 20, 39, "스포츠", 2, 2L);
+        setSpent(exhausted, 2L);
+        exhausted.assignId(1L);
+        Campaign other = campaign("other", 1, 20, 39, "스포츠", 2, 50_000L);
+        other.assignId(2L);
+
+        Optional<SelectedAd> selected = selector.select(
+                List.of(
+                        new CampaignCreative(exhausted, creative(1L, "/exhausted.png")),
+                        new CampaignCreative(other, creative(2L, "/other.png"))
+                ),
+                new User(1L, 28, "스포츠"),
+                new Content(1L, "축구 하이라이트", "스포츠"),
+                NOW
+        );
+
+        assertThat(selected).isPresent();
+        assertThat(selected.get().campaignId()).isEqualTo(2L);
+    }
+
+    @Test
+    void allowsCampaignWhenSpentBudgetBelowBudget() {
+        Campaign campaign = campaign("target", 50, 20, 39, "스포츠", 2, 2L);
+        setSpent(campaign, 1L);
+        campaign.assignId(1L);
+
+        Optional<SelectedAd> selected = selector.select(
+                List.of(new CampaignCreative(campaign, creative(1L, "/a.png"))),
+                new User(1L, 28, "스포츠"),
+                new Content(1L, "축구 하이라이트", "스포츠"),
+                NOW
+        );
+
+        assertThat(selected).isPresent();
+        assertThat(selected.get().campaignId()).isEqualTo(1L);
+    }
+
+    @Test
+    void skipsCampaignWhenBudgetIsZero() {
+        Campaign zero = campaign("zero", 50, 20, 39, "스포츠", 2, 0L);
+        zero.assignId(1L);
+
+        Optional<SelectedAd> selected = selector.select(
+                List.of(new CampaignCreative(zero, creative(1L, "/zero.png"))),
+                new User(1L, 28, "스포츠"),
+                new Content(1L, "축구 하이라이트", "스포츠"),
+                NOW
+        );
+
+        assertThat(selected).isEmpty();
+    }
+
+    @Test
     void ignoresCapWhenFrequencyCapIsZero() {
         Campaign unlimited = campaign("unlimited", 50, 20, 39, "스포츠", 0);
         unlimited.assignId(1L);
@@ -151,13 +205,25 @@ class AdSelectionTest {
     }
 
     private static Campaign campaign(String name, int priority, int ageMin, int ageMax, String category) {
-        return campaign(name, priority, ageMin, ageMax, category, 2);
+        return campaign(name, priority, ageMin, ageMax, category, 2, 50_000L);
     }
 
     private static Campaign campaign(String name, int priority, int ageMin, int ageMax, String category, int frequencyCap) {
+        return campaign(name, priority, ageMin, ageMax, category, frequencyCap, 50_000L);
+    }
+
+    private static Campaign campaign(
+            String name,
+            int priority,
+            int ageMin,
+            int ageMax,
+            String category,
+            int frequencyCap,
+            long budget
+    ) {
         return Campaign.create(
                 name,
-                50_000L,
+                budget,
                 Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-12-31T23:59:59Z"),
                 priority,
@@ -166,5 +232,15 @@ class AdSelectionTest {
                 category,
                 frequencyCap
         );
+    }
+
+    private static void setSpent(Campaign campaign, long spent) {
+        try {
+            var field = Campaign.class.getDeclaredField("spentBudget");
+            field.setAccessible(true);
+            field.setLong(campaign, spent);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

@@ -31,6 +31,7 @@ public class AdSelector {
         Map<Long, Long> counts = todayImpressions != null ? todayImpressions : Map.of();
         return candidates.stream()
                 .filter(item -> item.campaign().isActiveAt(now))
+                .filter(item -> item.campaign().hasRemainingBudget())
                 .filter(item -> item.campaign().matches(user.getAge(), content.getCategory()))
                 .filter(item -> withinFrequencyCap(item.campaign(), counts))
                 .max(Comparator

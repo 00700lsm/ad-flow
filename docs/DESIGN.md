@@ -93,9 +93,9 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 2
-동일 사용자 과다 노출
-코드: T2-03 선택 시점 원자적 INCR (PostgreSQL). T2-04 Player에서 캡 이후 광고 변경 확인
+Phase 3
+예산 초과 소진
+코드: T3-01 순차 Impression 차감. 동시 Overspending 한도는 아직 없음
 ```
 
 현재 구조:
@@ -105,8 +105,9 @@ Browser (console / player / dashboard-ui)
   ↓
 Spring Boot
   ├─ Campaign / Creative CRUD
-  ├─ Ad Selection (활성 / 기간 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap)
+  ├─ Ad Selection (활성 / 기간 / 예산 잔여 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap)
   ├─ Impression / Click 동기 저장  ← Dashboard 집계. 캡 카운터가 아님
+  │    Impression 1건당 spentBudget +1. 도달 시 BUDGET_EXHAUSTED
   └─ Dashboard 집계
   ↓
 PostgreSQL
@@ -118,6 +119,7 @@ PostgreSQL
 Frequency Cap 카운터는 `GET /ads`가 후보를 고를 때 `count < cap`인 행만 원자적으로 +1 한다.
 실패하면 다음 우선순위 캠페인을 시도한다. `frequencyCap = 0`은 올리지 않는다.
 Impression INSERT는 캡을 채우지 않는다. GET만 해도 슬롯은 줄어든다 (ADR 003).
+예산은 Impression이 채운다. GET만 하면 spentBudget은 안 오른다.
 T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=15.
 
 아직 코드에 없는 것:
@@ -125,7 +127,7 @@ T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=
 ```text
 Redis
 Kafka
-Budget 차감 / BUDGET_EXHAUSTED
+동시 요청 Budget Overspending 방지 (Lock / DECR)
 Traffic Simulator
 SSE / WebSocket
 Mock Ad Exchange
@@ -644,6 +646,19 @@ T2-03에서 선택 시점 원자적 INCR로 동시 GET 한도를 테스트로 �
 ## 12.3 Phase 3. Budget Control
 
 캠페인 예산이 소진되면 광고 노출을 중단한다.
+
+현재 코드 (T3-01, 순차):
+
+```text
+GET /ads
+  spentBudget >= budget 이면 제외
+POST /events/impression
+  spentBudget +1
+  spentBudget >= budget 이면 BUDGET_EXHAUSTED
+CLICK은 예산을 올리지 않는다
+```
+
+동시 요청 Overspending 0은 아직 아니다. Lock / Redis는 쓰지 않는다.
 
 초기에는 PostgreSQL 기반으로 구현하고 동시 요청 시 Overspending을 재현한다.
 

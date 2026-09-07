@@ -108,6 +108,17 @@ public class Campaign {
                 && !now.isAfter(endAt);
     }
 
+    public boolean hasRemainingBudget() {
+        return spentBudget < budget;
+    }
+
+    public void chargeImpression() {
+        spentBudget += 1;
+        if (spentBudget >= budget) {
+            status = CampaignStatus.BUDGET_EXHAUSTED;
+        }
+    }
+
     public boolean matches(int age, String contentCategory) {
         return age >= targetAgeMin
                 && age <= targetAgeMax
