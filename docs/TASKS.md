@@ -19,13 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T2-04 DONE
-Phase 2: DONE
-T2-01: DONE
-T2-02: DONE (Race 재현)
-T2-03: DONE (선택 시점 원자적 INCR)
-T2-04: DONE (Player에서 캡 이후 광고 변경 확인)
-다음: Phase 3는 개발자가 요청할 때
+현재 Task: T3-01 Plan HITL
+Phase 3: IN PROGRESS
+T2-01 ~ T2-04: DONE
+다음: T3-01 승인 후 Red
 ```
 
 ---
@@ -33,16 +30,16 @@ T2-04: DONE (Player에서 캡 이후 광고 변경 확인)
 # 1. 현재 Phase
 
 ```text
-Phase 2
-동일 사용자 과다 노출
-상태: DONE
+Phase 3
+예산 초과 소진
+상태: IN PROGRESS
 ```
 
 목표:
 
-같은 사용자가 같은 광고를 하루 N번 넘게 보지 않게 한다.
+잔여 예산이 없으면 그 캠페인은 노출되지 않는다. 소진 시 `BUDGET_EXHAUSTED`.
 
-Phase 1은 DONE이다.
+Phase 1·2는 DONE이다. FR-10 전체를 한 Task로 구현하지 않는다.
 
 ---
 
@@ -50,14 +47,15 @@ Phase 1은 DONE이다.
 
 ```text
 Redis / Kafka / Lua / Distributed Lock
-후보 B / 후보 C
-Budget Overspending 해결
+후보 B / 후보 C (Lock / Redis DECR)
+동시 요청 Overspending 0을 T3-01에서 고정
 Traffic Simulator API
 SSE / WebSocket
 k6 / Prometheus / Grafana
 Mock Ad Exchange
 Kubernetes / AWS
 운영 AI
+Frequency Cap 계약 변경
 ```
 
 ROADMAP에 있다는 이유만으로 구현하지 않는다.
@@ -68,6 +66,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T3-01. Budget 순차 차감
+
+상태: `TODO` (Plan HITL)
+
+완료 조건:
+
+```text
+spentBudget이 budget에 도달하면 GET /ads가 그 캠페인을 고르지 않는다
+Impression 1건당 spentBudget +1
+도달 시 상태는 BUDGET_EXHAUSTED
+다른 후보가 있으면 그 광고를 고른다
+Redis / Lock / 동시성 보장은 포함하지 않는다
+```
 
 ## T2-04. Player에서 Frequency Cap 이후 광고 변경 확인
 
