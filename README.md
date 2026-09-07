@@ -31,14 +31,15 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ```text
 Phase 2
 동일 사용자 과다 노출
-T2-01 순차 Frequency Cap: READY
-Race / Redis: 아직 없음
+T2-03 선택 시점 원자적 INCR (PostgreSQL)
+T2-04 Player에서 캡 이후 광고 변경 확인
+Redis 없음
 ```
 
 Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click을 확인할 수 있다.
 
-같은 사용자의 당일 Impression이 Frequency Cap에 도달하면 `GET /ads`는 그 캠페인을 고르지 않는다.
-동시 요청 한도와 Redis는 아직 넣지 않았다. Budget, Kafka, Simulator도 없다.
+`GET /ads`가 후보를 고를 때 당일 캡 카운터를 원자적으로 올린다. 한도에 걸린 캠페인은 다음 후보가 있으면 그 광고를 고른다. Impression은 Dashboard 집계용이며 캡 카운터가 아니다.
+동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Budget, Kafka, Simulator도 없다.
 
 ---
 
@@ -69,6 +70,15 @@ http://localhost:8080/dashboard.html 성과
 ```
 
 샘플: 사용자 1(28세, 스포츠) + 콘텐츠 1(축구 하이라이트)에 스포츠 캠페인이 붙는다.
+
+Frequency Cap을 Player에서 보려면 Console에서 같은 타겟(20–39세, 스포츠) 캠페인 두 개를 만든다.
+
+```text
+고우선  이름 예: 아이폰  cap=1  priority=20
+저우선  이름 예: 나이키  cap=2  priority=10
+```
+
+`/player.html`에서 사용자 A · 축구 하이라이트를 두 번 재생한다. 이번 세션 노출 이력이 다른 캠페인 이름이어야 한다. 재생할 때마다 `GET /ads`가 슬롯을 소비한다.
 
 ---
 

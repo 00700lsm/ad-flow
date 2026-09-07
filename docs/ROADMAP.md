@@ -218,9 +218,11 @@ Legacy → New 점진 전환과 Shadow Traffic
 
 ```text
 Current Phase: Phase 2
-상태: IN_PROGRESS
+상태: DONE
 T2-01: DONE (순차 Frequency Cap)
 T2-02: DONE (Race 재현)
+T2-03: DONE (선택 시점 원자적 INCR)
+T2-04: DONE (Player에서 캡 이후 광고 변경 확인)
 Human Gate: A (ADR 003, PostgreSQL)
-다음: Player에서 캡 이후 광고 변경 확인
+다음: Phase 3는 개발자가 요청할 때
 ```

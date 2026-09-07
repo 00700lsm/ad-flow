@@ -19,12 +19,13 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T2-03 DONE
-Phase 2: IN_PROGRESS
+현재 Task: T2-04 DONE
+Phase 2: DONE
 T2-01: DONE
 T2-02: DONE (Race 재현)
 T2-03: DONE (선택 시점 원자적 INCR)
-다음: Player에서 캡 이후 광고 변경 확인. 새 Task는 개발자가 요청할 때
+T2-04: DONE (Player에서 캡 이후 광고 변경 확인)
+다음: Phase 3는 개발자가 요청할 때
 ```
 
 ---
@@ -34,12 +35,12 @@ T2-03: DONE (선택 시점 원자적 INCR)
 ```text
 Phase 2
 동일 사용자 과다 노출
-상태: IN_PROGRESS
+상태: DONE
 ```
 
 목표:
 
-같은 사용자가 같은 광고를 하루 N번 넘게 보지 않게 한다. T2-03은 선택 시점 원자적 INCR(ADR 003)만 다룬다.
+같은 사용자가 같은 광고를 하루 N번 넘게 보지 않게 한다.
 
 Phase 1은 DONE이다.
 
@@ -67,6 +68,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T2-04. Player에서 Frequency Cap 이후 광고 변경 확인
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+같은 사용자가 Player에서 반복 재생하면 캡에 걸린 캠페인은 안 나오고
+다른 후보가 있으면 그 광고가 나온다
+전환은 세션 노출 이력에서 캠페인 이름으로 읽는다
+시연 경로는 README에 GET /ads 슬롯 소비로 적힌다
+Redis / 새 HTTP API / 캡 로직 변경은 포함하지 않는다
+```
 
 ## T2-03. Frequency Cap 선택 시점 원자적 INCR
 
@@ -225,6 +240,6 @@ Phase 2:
 
 - [x] T2-01 순차 Frequency Cap
 - [x] FR-09 동시 요청 한도 (T2-03 테스트)
-- [ ] Player에서 캡 이후 광고가 바뀌는 것을 확인
+- [x] Player에서 캡 이후 광고가 바뀌는 것을 확인
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

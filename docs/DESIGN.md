@@ -95,7 +95,7 @@ Current Phase
 
 Phase 2
 동일 사용자 과다 노출
-코드: T2-03 선택 시점 원자적 INCR (PostgreSQL). Player 확인은 남음
+코드: T2-03 선택 시점 원자적 INCR (PostgreSQL). T2-04 Player에서 캡 이후 광고 변경 확인
 ```
 
 현재 구조:
@@ -639,7 +639,7 @@ GET /ads
 T2-02에서 동시 GET+Impression Race를 재현했다.
 T2-03에서 선택 시점 원자적 INCR로 동시 GET 한도를 테스트로 고정했다 (ADR 003). Redis / Lua는 쓰지 않는다.
 
-결과는 OTT Player에서 동일 광고가 더 이상 노출되지 않는 형태로 직접 확인한다. 이 확인은 아직 남았다.
+결과는 OTT Player에서 동일 광고가 더 이상 노출되지 않는 형태로 확인한다. 세션 노출 이력에 캠페인 이름이 쌓인다. T2-04에서 Player 경로(GET /ads 후 Impression)로 고우선 cap=1 다음 저우선이 나오는 것을 확인했다.
 
 ## 12.3 Phase 3. Budget Control
 

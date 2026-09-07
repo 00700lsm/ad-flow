@@ -36,6 +36,8 @@
       <p class="muted">재생을 누르면 광고가 요청됩니다</p>
     </div>
     <p id="status" class="muted"></p>
+    <h2>이번 세션 노출</h2>
+    <ol id="adHistory"></ol>
   </div>
 </main>
 <script>
@@ -60,6 +62,9 @@ document.getElementById('play').addEventListener('click', async () => {
     <button id="clickAd">광고 클릭</button>
   `;
   status.textContent = `노출: ${ad.campaignName}`;
+  const historyItem = document.createElement('li');
+  historyItem.textContent = ad.campaignName;
+  document.getElementById('adHistory').appendChild(historyItem);
   await fetch('/events/impression', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
