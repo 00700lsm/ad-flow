@@ -143,6 +143,8 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 
 ## Phase 4. 서빙과 이벤트 처리 결합
 
+상태: `IN PROGRESS`
+
 질문:
 
 이벤트 적재가 느려지면 광고 선택 API도 같이 느려지는가?
@@ -219,11 +221,8 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 3
-상태: DONE
-T3-01: DONE (순차 Budget)
-T3-02: DONE (Overspend 재현)
-T3-03: DONE (선택 시점 원자적 차감, ADR 004)
-T3-04: DONE (Dashboard 예산·상태 확인)
-다음: Phase 4는 개발자가 요청할 때
+Current Phase: Phase 4
+상태: IN PROGRESS
+T4-01: DONE (Serving·Event 커넥션 결합 재현)
+다음: 분리 해법은 Human Gate 후, 개발자가 요청할 때
 ```

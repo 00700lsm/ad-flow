@@ -1,0 +1,1 @@
+eventHoldMs=400 getAdsWaitMs=409 pool=1

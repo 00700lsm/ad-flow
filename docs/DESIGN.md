@@ -93,9 +93,9 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 3 DONE
-예산 초과 소진
-코드: T3-03 선택 시점 원자적 차감 (PostgreSQL). T3-04 Dashboard 사용·잔여·상태
+Phase 4
+서빙과 이벤트 처리 결합
+코드: T4-01 같은 DB 풀에서 이벤트 INSERT가 GET /ads를 기다리게 함. Kafka 없음
 ```
 
 현재 구조:
@@ -124,6 +124,7 @@ T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=
 T3-02 측정(해법 전): requests=16 selected=16 impressions=16 budget=1 spent=16 overflow=15.
 T3-03 테스트(해법 후, 동시 GET): requests=16 selected=1 budget=1 spent=1.
 T3-04에서 Dashboard에 spentBudget / remainingBudget / status를 붙였다. budget=1 고우선 다음 저우선이 나온다.
+T4-01 측정: eventHoldMs=400 getAdsWaitMs=409 pool=1. 해법(큐/Kafka)은 없음.
 
 아직 코드에 없는 것:
 
@@ -690,7 +691,17 @@ Overspending 여부
 
 ## 12.4 Phase 4. Kafka Event Pipeline
 
-Impression / Click 이벤트를 Kafka 기반으로 처리한다.
+Impression / Click 이벤트를 Kafka 기반으로 처리한다. **현재 코드는 아직 동기 INSERT**다.
+
+T4-01: 같은 Hikari 풀에서 이벤트 트랜잭션이 커넥션을 붙잡으면 GET `/ads`가 기다린다 (테스트 pool=1, getAdsWaitMs=409). Kafka는 없다.
+
+현재 코드 (T4-01):
+
+```text
+GET /ads 와 POST /events/* 는 같은 DataSource
+이벤트 INSERT가 커넥션을 붙잡으면 선택이 대기한다
+분리 해법은 Human Gate 전
+```
 
 ```text
 OTT Player

@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T3-04 DONE
-Phase 3: DONE
+현재 Task: T4-01 DONE
+Phase 4: IN PROGRESS
 T3-01 ~ T3-04: DONE
-다음: Phase 4는 개발자가 요청할 때
+다음: Phase 4 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -30,32 +30,31 @@ T3-01 ~ T3-04: DONE
 # 1. 현재 Phase
 
 ```text
-Phase 3
-예산 초과 소진
-상태: DONE
+Phase 4
+서빙과 이벤트 처리 결합
+상태: IN PROGRESS
 ```
 
 목표:
 
-잔여 예산이 없으면 그 캠페인은 노출되지 않는다. 소진 시 `BUDGET_EXHAUSTED`.
+이벤트 적재가 느려도 광고 선택 API가 같이 멈추지 않는지 먼저 재현한다. 분리 기술은 측정 후 Human Gate에서 고른다.
 
-Phase 1·2는 DONE이다. FR-10 전체를 한 Task로 구현하지 않는다.
+Phase 3는 DONE이다. FR-11 전체를 한 Task로 구현하지 않는다.
 
 ---
 
 # 2. 이 Phase에서 하지 않는 것
 
 ```text
-Redis / Kafka / Lua / Distributed Lock
-후보 B / 후보 C (Lock / Redis DECR)
-동시 요청 Overspending 0을 T3-01·T3-02에서 고정
+Kafka / Redis / Consumer (Human Gate 전)
+k6 / Prometheus / Grafana
 Traffic Simulator API
 SSE / WebSocket
-k6 / Prometheus / Grafana
 Mock Ad Exchange
 Kubernetes / AWS
 운영 AI
-Frequency Cap 계약 변경
+Frequency Cap / Budget 계약 변경
+FR-12 멱등
 ```
 
 ROADMAP에 있다는 이유만으로 구현하지 않는다.
@@ -66,6 +65,19 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T4-01. Serving·Event 커넥션 결합 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+이벤트 기록이 DB 커넥션을 붙잡고 있으면 GET /ads 가 같이 기다린다
+대기를 테스트로 재현하고 시간을 남긴다
+Kafka / 비동기 분리 / Consumer 재처리는 포함하지 않는다
+Human Gate 전에 Serving과 이벤트 저장을 나누지 않는다
+```
 
 ## T3-04. Dashboard에서 예산 소진 확인
 
@@ -301,5 +313,10 @@ Phase 3:
 - [x] T3-01 순차 Budget
 - [x] FR-10 동시 요청 한도 (T3-03 테스트)
 - [x] Dashboard에서 예산 감소와 BUDGET_EXHAUSTED 확인
+
+Phase 4:
+
+- [x] T4-01 Serving·Event 결합 재현
+- [ ] FR-11 분리 (Human Gate 후)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

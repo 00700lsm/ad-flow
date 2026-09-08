@@ -17,7 +17,7 @@ models:
   refactor: "high_tier"
 
 project:
-  current_phase: 3
+  current_phase: 4
   source_of_truth:
     - docs/REQUIREMENTS.md
     - docs/DESIGN.md
