@@ -19,9 +19,9 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T3-01 DONE
+현재 Task: T3-02 DONE
 Phase 3: IN PROGRESS
-T2-01 ~ T2-04: DONE
+T3-01: DONE
 다음: Phase 3 다음 Task는 개발자가 요청할 때
 ```
 
@@ -48,7 +48,7 @@ Phase 1·2는 DONE이다. FR-10 전체를 한 Task로 구현하지 않는다.
 ```text
 Redis / Kafka / Lua / Distributed Lock
 후보 B / 후보 C (Lock / Redis DECR)
-동시 요청 Overspending 0을 T3-01에서 고정
+동시 요청 Overspending 0을 T3-01·T3-02에서 고정
 Traffic Simulator API
 SSE / WebSocket
 k6 / Prometheus / Grafana
@@ -66,6 +66,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T3-02. Budget Overspend 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+동일 캠페인에 동시 GET /ads + Impression 시
+spentBudget이 budget을 넘는 경우가 테스트로 재현된다
+초과분을 측정한다
+Redis / Lock / Lua 해법은 포함하지 않는다
+Human Gate 전에 한도 준수로 고치지 않는다
+```
 
 ## T3-01. Budget 순차 차감
 

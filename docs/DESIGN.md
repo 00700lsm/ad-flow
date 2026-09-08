@@ -95,7 +95,7 @@ Current Phase
 
 Phase 3
 예산 초과 소진
-코드: T3-01 순차 Impression 차감. 동시 Overspending 한도는 아직 없음
+코드: T3-01 순차 Impression 차감. T3-02 동시 GET+Impression Overspending 재현 (해법 없음)
 ```
 
 현재 구조:
@@ -121,6 +121,7 @@ Frequency Cap 카운터는 `GET /ads`가 후보를 고를 때 `count < cap`인 �
 Impression INSERT는 캡을 채우지 않는다. GET만 해도 슬롯은 줄어든다 (ADR 003).
 예산은 Impression이 채운다. GET만 하면 spentBudget은 안 오른다.
 T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=15.
+T3-02 측정(해법 전): requests=16 selected=16 impressions=16 budget=1 spent=16 overflow=15.
 
 아직 코드에 없는 것:
 
@@ -659,6 +660,7 @@ CLICK은 예산을 올리지 않는다
 ```
 
 동시 요청 Overspending 0은 아직 아니다. Lock / Redis는 쓰지 않는다.
+T3-02에서 동시 GET 16건이 모두 선택되고 Impression 후 spent=16, budget=1, overflow=15.
 
 초기에는 PostgreSQL 기반으로 구현하고 동시 요청 시 Overspending을 재현한다.
 
