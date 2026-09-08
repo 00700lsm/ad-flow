@@ -513,13 +513,14 @@ AI는 핵심 시스템을 완성한 뒤에만 검토한다.
 
 ## 바이브 루프
 
-구현은 대화로 바로 코드를 쓰지 않는다.
+구현은 대화로 바로 코드를 쓰지 않는다. 사람용 설명은 저장소 루트 `HARNESS.md`다.
 
 ```text
 Analysis → Plan(HITL) → Red → Green → Lint → Refactor → Summary
 ```
 
 ```text
+HARNESS.md                                   하네스·HITL·Artifact 설명 (사람용)
 AGENTS.md                                    에이전트 진입점
 .cursor/rules/ad-flow.mdc                    항상 적용 규칙
 .cursor/skills/ad-flow-vibe-coding/SKILL.md  Task 루프
@@ -541,6 +542,7 @@ docs/Poc.md                                  상태 그래프 철학
 ## 문서
 
 ```text
+HARNESS.md            에이전트 하네스·HITL·Artifact (사람용)
 docs/REQUIREMENTS.md  무엇을 만족해야 하는가
 docs/DESIGN.md        목표 / 현재 시스템 구조
 docs/ROADMAP.md       문제 확인 순서

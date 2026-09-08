@@ -4,6 +4,7 @@
 사용자는 파일 경로를 적지 않는다. `다음` / `승인` / Task ID면 충분하다.
 
 ```text
+HARNESS.md 사람용 하네스 설명
 규칙     .cursor/rules/ad-flow.mdc
 루프     .cursor/skills/ad-flow-vibe-coding/SKILL.md
 철학     docs/Poc.md
