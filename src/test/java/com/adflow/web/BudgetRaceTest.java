@@ -39,13 +39,11 @@ class BudgetRaceTest {
     private final JsonMapper json = JsonMapper.builder().build();
 
     @Test
-    void concurrentSelectThenImpressionExceedsBudget() throws Exception {
+    void concurrentSelectDoesNotExceedBudget() throws Exception {
         int campaignId = createCampaign("race-budget", 100, BUDGET);
-        int creativeId = addCreative(campaignId, "/race.png");
+        addCreative(campaignId, "/race.png");
 
-        int[] statuses = new int[THREADS];
         AtomicInteger selected = new AtomicInteger();
-        AtomicInteger impressions = new AtomicInteger();
 
         CountDownLatch startGet = new CountDownLatch(1);
         CountDownLatch getsDone = new CountDownLatch(THREADS);
@@ -53,7 +51,6 @@ class BudgetRaceTest {
         ExecutorService pool = Executors.newFixedThreadPool(THREADS);
         try {
             for (int i = 0; i < THREADS; i++) {
-                final int index = i;
                 pool.submit(() -> {
                     try {
                         startGet.await();
@@ -61,13 +58,10 @@ class BudgetRaceTest {
                                         .param("userId", String.valueOf(USER_ID))
                                         .param("contentId", String.valueOf(CONTENT_ID)))
                                 .andReturn();
-                        int status = getResult.getResponse().getStatus();
-                        statuses[index] = status;
-                        if (status == 200) {
+                        if (getResult.getResponse().getStatus() == 200) {
                             selected.incrementAndGet();
                         }
-                    } catch (Exception e) {
-                        statuses[index] = -1;
+                    } catch (Exception ignored) {
                     } finally {
                         getsDone.countDown();
                     }
@@ -80,30 +74,22 @@ class BudgetRaceTest {
             pool.shutdownNow();
         }
 
-        for (int i = 0; i < THREADS; i++) {
-            if (statuses[i] == 200) {
-                postImpression("imp-" + i, campaignId, creativeId);
-                impressions.incrementAndGet();
-            }
-        }
-
         MvcResult campaign = mockMvc.perform(get("/campaigns/" + campaignId))
                 .andExpect(status().isOk())
                 .andReturn();
         long spent = json.readTree(campaign.getResponse().getContentAsString())
                 .get("spentBudget")
                 .asLong();
-        long overflow = Math.max(spent - BUDGET, selected.get() - BUDGET);
 
         Files.writeString(
-                Path.of(".agent/artifacts/T3-02/measurement.txt"),
-                "requests=%d selected=%d impressions=%d budget=%d spent=%d overflow=%d%n".formatted(
-                        THREADS, selected.get(), impressions.get(), BUDGET, spent, overflow
+                Path.of(".agent/artifacts/T3-03/measurement.txt"),
+                "requests=%d selected=%d budget=%d spent=%d%n".formatted(
+                        THREADS, selected.get(), BUDGET, spent
                 )
         );
 
-        assertThat(selected.get()).isGreaterThan((int) BUDGET);
-        assertThat(spent).isGreaterThan(BUDGET);
+        assertThat(selected.get()).isLessThanOrEqualTo((int) BUDGET);
+        assertThat(spent).isLessThanOrEqualTo(BUDGET);
     }
 
     private int createCampaign(String name, int priority, long budget) throws Exception {
@@ -130,8 +116,8 @@ class BudgetRaceTest {
         return json.readTree(response).get("id").asInt();
     }
 
-    private int addCreative(int campaignId, String mediaUrl) throws Exception {
-        String response = mockMvc.perform(post("/campaigns/" + campaignId + "/creatives")
+    private void addCreative(int campaignId, String mediaUrl) throws Exception {
+        mockMvc.perform(post("/campaigns/" + campaignId + "/creatives")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -140,25 +126,6 @@ class BudgetRaceTest {
                                   "clickUrl": "https://example.com"
                                 }
                                 """.formatted(mediaUrl)))
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        return json.readTree(response).get("id").asInt();
-    }
-
-    private void postImpression(String eventId, int campaignId, int creativeId) throws Exception {
-        mockMvc.perform(post("/events/impression")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "eventId": "%s",
-                                  "campaignId": %d,
-                                  "creativeId": %d,
-                                  "userId": %d,
-                                  "contentId": %d
-                                }
-                                """.formatted(eventId, campaignId, creativeId, USER_ID, CONTENT_ID)))
                 .andExpect(status().isCreated());
     }
 }

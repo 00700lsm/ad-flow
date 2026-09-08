@@ -71,7 +71,9 @@ public class AdServingService {
             Campaign campaign = campaignOf(remaining, selected.campaignId());
             if (campaign.getFrequencyCap() <= 0
                     || frequencyCaps.tryIncrement(userId, campaign.getId(), utcDay, campaign.getFrequencyCap())) {
-                return selected;
+                if (campaigns.tryCharge(campaign.getId()) > 0) {
+                    return selected;
+                }
             }
             remaining = remaining.stream()
                     .filter(item -> !item.campaign().getId().equals(campaign.getId()))

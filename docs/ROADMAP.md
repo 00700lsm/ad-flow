@@ -217,12 +217,10 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 2
-상태: DONE
-T2-01: DONE (순차 Frequency Cap)
-T2-02: DONE (Race 재현)
-T2-03: DONE (선택 시점 원자적 INCR)
-T2-04: DONE (Player에서 캡 이후 광고 변경 확인)
-Human Gate: A (ADR 003, PostgreSQL)
-다음: Phase 3는 개발자가 요청할 때
+Current Phase: Phase 3
+상태: IN PROGRESS
+T3-01: DONE (순차 Budget)
+T3-02: DONE (Overspend 재현)
+T3-03: DONE (선택 시점 원자적 차감, ADR 004)
+다음: Phase 3 남은 화면 확인은 개발자가 요청할 때
 ```

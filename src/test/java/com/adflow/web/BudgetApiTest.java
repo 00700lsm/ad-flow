@@ -26,14 +26,18 @@ class BudgetApiTest {
     private final JsonMapper json = JsonMapper.builder().build();
 
     @Test
-    void impressionsExhaustBudgetThenSelectsOtherCampaign() throws Exception {
+    void afterBudgetReached_selectsOtherCampaign() throws Exception {
         int high = createCampaign("high", 20, 2);
         addCreative(high, "/high.png");
         int low = createCampaign("low", 1, 50_000L);
         int lowCreative = addCreative(low, "/low.png");
 
-        postImpression("imp-1", high);
-        postImpression("imp-2", high);
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(high)));
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(high)));
 
         mockMvc.perform(get("/campaigns/" + high))
                 .andExpect(status().isOk())
@@ -47,21 +51,31 @@ class BudgetApiTest {
     }
 
     @Test
-    void clickDoesNotIncreaseSpentBudget() throws Exception {
-        int campaignId = createCampaign("click-only", 20, 2);
+    void impressionAndClickDoNotIncreaseSpentBudget() throws Exception {
+        int campaignId = createCampaign("events-only", 20, 2);
+        int creativeId = addCreative(campaignId, "/a.png");
 
-        postImpression("imp-1", campaignId);
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(campaignId)));
+
+        mockMvc.perform(get("/campaigns/" + campaignId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(1)))
+                .andExpect(jsonPath("$.status", is("ACTIVE")));
+
+        postImpression("imp-1", campaignId, creativeId);
         mockMvc.perform(post("/events/click")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "eventId": "clk-1",
                                   "campaignId": %d,
-                                  "creativeId": 1,
+                                  "creativeId": %d,
                                   "userId": 1,
                                   "contentId": 1
                                 }
-                                """.formatted(campaignId)))
+                                """.formatted(campaignId, creativeId)))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(get("/campaigns/" + campaignId))
@@ -111,18 +125,18 @@ class BudgetApiTest {
         return json.readTree(response).get("id").asInt();
     }
 
-    private void postImpression(String eventId, int campaignId) throws Exception {
+    private void postImpression(String eventId, int campaignId, int creativeId) throws Exception {
         mockMvc.perform(post("/events/impression")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "eventId": "%s",
                                   "campaignId": %d,
-                                  "creativeId": 1,
+                                  "creativeId": %d,
                                   "userId": 1,
                                   "contentId": 1
                                 }
-                                """.formatted(eventId, campaignId)))
+                                """.formatted(eventId, campaignId, creativeId)))
                 .andExpect(status().isCreated());
     }
 }
