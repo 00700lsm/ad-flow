@@ -28,5 +28,13 @@ class PlayerPageTest {
         assertThat(html).contains("id=\"adHistory\"");
         assertThat(html).contains("getElementById('adHistory')");
         assertThat(html).contains("ad.campaignName");
+        assertThat(html).contains("<video src=");
+        assertThat(html).contains(".mp4");
+    }
+
+    @Test
+    void exampleAdVideoIsServed() throws Exception {
+        mockMvc.perform(get("/ads/videos/example.mp4"))
+                .andExpect(status().isOk());
     }
 }

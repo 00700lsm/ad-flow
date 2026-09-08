@@ -69,6 +69,17 @@ http://localhost:8080/player.html   광고 재생
 http://localhost:8080/dashboard.html 성과
 ```
 
+광고 영상은 업로드 첨부파일이 아니다. 저장소 `src/main/resources/static/ads/videos/`에 파일을 두고, 캠페인 소재 URL에 그 경로를 적으면 Spring이 정적 리소스로 내려준다.
+
+```text
+파일     src/main/resources/static/ads/videos/example.mp4
+URL      /ads/videos/example.mp4
+콘솔     소재 URL에 위 경로를 넣는다 (기본값)
+Player   mediaUrl이 .mp4이면 <video>로 재생한다
+```
+
+S3 / 파일 업로드 API / CDN은 없다. 영상을 바꾸려면 리소스 폴더에 파일을 넣고 소재 URL만 맞추면 된다.
+
 샘플: 사용자 1(28세, 스포츠) + 콘텐츠 1(축구 하이라이트)에 스포츠 캠페인이 붙는다.
 
 Frequency Cap을 Player에서 보려면 Console에서 같은 타겟(20–39세, 스포츠) 캠페인 두 개를 만든다.

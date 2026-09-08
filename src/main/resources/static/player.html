@@ -35,6 +35,7 @@
     <div class="player" id="screen">
       <p class="muted">재생을 누르면 광고가 요청됩니다</p>
     </div>
+    <div id="adActions"></div>
     <p id="status" class="muted"></p>
     <h2>이번 세션 노출</h2>
     <ol id="adHistory"></ol>
@@ -49,18 +50,21 @@ document.getElementById('play').addEventListener('click', async () => {
   const userId = Number(document.getElementById('userId').value);
   const contentId = Number(document.getElementById('contentId').value);
   const screen = document.getElementById('screen');
+  const actions = document.getElementById('adActions');
   const status = document.getElementById('status');
   const response = await fetch(`/ads?userId=${userId}&contentId=${contentId}`);
   const ad = await response.json();
   if (!response.ok) {
     screen.innerHTML = `<p class="muted">${ad.error || '광고 없음'}</p>`;
+    actions.innerHTML = '';
     status.textContent = '';
     return;
   }
-  screen.innerHTML = `
-    <img src="${ad.mediaUrl}" alt="${ad.campaignName}">
-    <button id="clickAd">광고 클릭</button>
-  `;
+  const media = ad.mediaUrl && ad.mediaUrl.toLowerCase().endsWith('.mp4')
+    ? `<video src="${ad.mediaUrl}" controls autoplay playsinline></video>`
+    : `<img src="${ad.mediaUrl}" alt="${ad.campaignName}">`;
+  screen.innerHTML = media;
+  actions.innerHTML = `<button id="clickAd">광고 클릭</button>`;
   status.textContent = `노출: ${ad.campaignName}`;
   const historyItem = document.createElement('li');
   historyItem.textContent = ad.campaignName;
