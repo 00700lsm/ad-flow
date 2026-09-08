@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T3-03 DONE
-Phase 3: IN PROGRESS
-T3-01 ~ T3-02: DONE
-다음: Phase 3 다음 Task는 개발자가 요청할 때
+현재 Task: T3-04 DONE
+Phase 3: DONE
+T3-01 ~ T3-04: DONE
+다음: Phase 4는 개발자가 요청할 때
 ```
 
 ---
@@ -32,7 +32,7 @@ T3-01 ~ T3-02: DONE
 ```text
 Phase 3
 예산 초과 소진
-상태: IN PROGRESS
+상태: DONE
 ```
 
 목표:
@@ -66,6 +66,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T3-04. Dashboard에서 예산 소진 확인
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+Player에서 예산을 소진하면 그 캠페인은 안 나오고, 다른 후보가 있으면 그 광고가 나온다
+Dashboard에서 spentBudget이 늘고 잔여가 줄며, 소진 캠페인 상태가 BUDGET_EXHAUSTED다
+전환은 Dashboard(상태·예산)와 Player 세션 이력(캠페인 이름)에서 읽는다
+시연 경로는 README에 T3-03 계약(GET /ads가 예산을 소비)으로 적힌다
+Redis / 새 HTTP 경로 / 예산 로직 변경은 포함하지 않는다
+```
 
 ## T3-03. Budget 선택 시점 원자적 차감
 
@@ -281,5 +295,11 @@ Phase 2:
 - [x] T2-01 순차 Frequency Cap
 - [x] FR-09 동시 요청 한도 (T2-03 테스트)
 - [x] Player에서 캡 이후 광고가 바뀌는 것을 확인
+
+Phase 3:
+
+- [x] T3-01 순차 Budget
+- [x] FR-10 동시 요청 한도 (T3-03 테스트)
+- [x] Dashboard에서 예산 감소와 BUDGET_EXHAUSTED 확인
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

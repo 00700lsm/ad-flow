@@ -128,6 +128,8 @@ Mock Ad Exchange
 
 ## Phase 3. 예산 초과 소진
 
+상태: `DONE`
+
 질문:
 
 남은 노출이 100인데 동시 요청 1,000이면 100을 넘는가?
@@ -218,9 +220,10 @@ Legacy → New 점진 전환과 Shadow Traffic
 
 ```text
 Current Phase: Phase 3
-상태: IN PROGRESS
+상태: DONE
 T3-01: DONE (순차 Budget)
 T3-02: DONE (Overspend 재현)
 T3-03: DONE (선택 시점 원자적 차감, ADR 004)
-다음: Phase 3 남은 화면 확인은 개발자가 요청할 때
+T3-04: DONE (Dashboard 예산·상태 확인)
+다음: Phase 4는 개발자가 요청할 때
 ```

@@ -17,7 +17,7 @@
   <div class="panel">
     <table>
       <thead>
-        <tr><th>ID</th><th>캠페인</th><th>노출</th><th>클릭</th><th>CTR</th></tr>
+        <tr><th>ID</th><th>캠페인</th><th>상태</th><th>사용 예산</th><th>잔여 예산</th><th>노출</th><th>클릭</th><th>CTR</th></tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
@@ -31,6 +31,9 @@ async function load() {
     `<tr>
       <td>${c.campaignId}</td>
       <td>${c.name}</td>
+      <td>${c.status}</td>
+      <td>${c.spentBudget}</td>
+      <td>${c.remainingBudget}</td>
       <td>${c.impressions}</td>
       <td>${c.clicks}</td>
       <td>${(c.ctr * 100).toFixed(2)}%</td>

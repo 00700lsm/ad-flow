@@ -29,17 +29,17 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 2
-동일 사용자 과다 노출
-T2-03 선택 시점 원자적 INCR (PostgreSQL)
-T2-04 Player에서 캡 이후 광고 변경 확인
+Phase 3
+예산 초과 소진
+T3-03 선택 시점 원자적 차감 (PostgreSQL)
+T3-04 Dashboard에서 예산 감소와 BUDGET_EXHAUSTED 확인
 Redis 없음
 ```
 
-Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click을 확인할 수 있다.
+Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click / 사용 예산 / 상태를 확인할 수 있다.
 
-`GET /ads`가 후보를 고를 때 당일 캡 카운터를 원자적으로 올린다. 한도에 걸린 캠페인은 다음 후보가 있으면 그 광고를 고른다. Impression은 Dashboard 집계용이며 캡 카운터가 아니다.
-동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Budget, Kafka, Simulator도 없다.
+`GET /ads`가 후보를 고를 때 당일 캡 카운터와 예산을 원자적으로 올린다. 한도·예산에 걸린 캠페인은 다음 후보가 있으면 그 광고를 고른다. Impression은 Dashboard 집계용이며 캡·예산 카운터가 아니다.
+동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Kafka, Simulator는 없다.
 
 ---
 
@@ -90,6 +90,15 @@ Frequency Cap을 Player에서 보려면 Console에서 같은 타겟(20–39세, 
 ```
 
 `/player.html`에서 사용자 A · 축구 하이라이트를 두 번 재생한다. 이번 세션 노출 이력이 다른 캠페인 이름이어야 한다. 재생할 때마다 `GET /ads`가 슬롯을 소비한다.
+
+예산을 Dashboard에서 보려면 Console에서 같은 타겟(20–39세, 스포츠) 캠페인 두 개를 만든다. Frequency Cap은 0으로 둔다.
+
+```text
+고우선  이름 예: 아이폰 예산시연  budget=1  priority=20  cap=0
+저우선  이름 예: 나이키 예산시연  budget=50000  priority=10  cap=0
+```
+
+같은 Player에서 두 번 재생한다. 이력 1번째는 고우선, 2번째는 저우선이어야 한다. `/dashboard.html`에서 고우선은 사용 1 / 잔여 0 / `BUDGET_EXHAUSTED`다. 재생할 때마다 `GET /ads`가 예산을 소비한다.
 
 ---
 

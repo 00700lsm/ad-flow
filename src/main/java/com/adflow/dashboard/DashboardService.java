@@ -36,6 +36,16 @@ public class DashboardService {
         long impressions = events.countByCampaignIdAndType(campaign.getId(), AdEventType.IMPRESSION);
         long clicks = events.countByCampaignIdAndType(campaign.getId(), AdEventType.CLICK);
         double ctr = impressions == 0 ? 0.0 : (double) clicks / impressions;
-        return new CampaignStats(campaign.getId(), campaign.getName(), impressions, clicks, ctr);
+        long remaining = campaign.getBudget() - campaign.getSpentBudget();
+        return new CampaignStats(
+                campaign.getId(),
+                campaign.getName(),
+                campaign.getStatus(),
+                campaign.getBudget(),
+                campaign.getSpentBudget(),
+                remaining,
+                impressions,
+                clicks,
+                ctr);
     }
 }

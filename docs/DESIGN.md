@@ -93,9 +93,9 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 3
+Phase 3 DONE
 예산 초과 소진
-코드: T3-03 선택 시점 원자적 차감 (PostgreSQL). T3-02 overflow=15 재현 후 한도 테스트
+코드: T3-03 선택 시점 원자적 차감 (PostgreSQL). T3-04 Dashboard 사용·잔여·상태
 ```
 
 현재 구조:
@@ -123,6 +123,7 @@ Impression INSERT는 예산을 채우지 않는다. GET만 해도 spentBudget은
 T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=15.
 T3-02 측정(해법 전): requests=16 selected=16 impressions=16 budget=1 spent=16 overflow=15.
 T3-03 테스트(해법 후, 동시 GET): requests=16 selected=1 budget=1 spent=1.
+T3-04에서 Dashboard에 spentBudget / remainingBudget / status를 붙였다. budget=1 고우선 다음 저우선이 나온다.
 
 아직 코드에 없는 것:
 
@@ -648,7 +649,7 @@ T2-03에서 선택 시점 원자적 INCR로 동시 GET 한도를 테스트로 �
 
 캠페인 예산이 소진되면 광고 노출을 중단한다.
 
-현재 코드 (T3-03, ADR 004):
+현재 코드 (T3-03·T3-04, ADR 004):
 
 ```text
 GET /ads
@@ -685,7 +686,7 @@ Overspending 여부
 실패율
 ```
 
-결과는 Dashboard에서 예산이 감소하고 캠페인이 `BUDGET_EXHAUSTED`로 바뀌는 모습으로 보여준다.
+결과는 Dashboard에서 예산이 감소하고 캠페인이 `BUDGET_EXHAUSTED`로 바뀌는 모습으로 보여준다. T3-04에서 summary 표에 사용·잔여·상태를 그렸다. SSE·초당 지표는 없다.
 
 ## 12.4 Phase 4. Kafka Event Pipeline
 

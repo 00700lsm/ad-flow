@@ -110,4 +110,52 @@ class AdEventDashboardApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.campaigns[0].impressions").exists());
     }
+
+    @Test
+    void selectAd_thenDashboardShowsSpentAndRemaining() throws Exception {
+        MvcResult created = mockMvc.perform(post("/campaigns")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "예산 소진 캠페인",
+                                  "budget": 1,
+                                  "startAt": "2026-01-01T00:00:00Z",
+                                  "endAt": "2026-12-31T23:59:59Z",
+                                  "priority": 5,
+                                  "targetAgeMin": 20,
+                                  "targetAgeMax": 39,
+                                  "targetCategory": "스포츠",
+                                  "frequencyCap": 0
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        int campaignId = com.fasterxml.jackson.databind.json.JsonMapper.builder().build()
+                .readTree(created.getResponse().getContentAsString())
+                .get("id")
+                .asInt();
+
+        mockMvc.perform(post("/campaigns/" + campaignId + "/creatives")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "type": "CARD",
+                                  "mediaUrl": "/ads/iphone.svg",
+                                  "clickUrl": "https://example.com/iphone"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.campaignId", is(campaignId)));
+
+        mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(1)))
+                .andExpect(jsonPath("$.remainingBudget", is(0)))
+                .andExpect(jsonPath("$.budget", is(1)))
+                .andExpect(jsonPath("$.status", is("BUDGET_EXHAUSTED")));
+    }
 }
