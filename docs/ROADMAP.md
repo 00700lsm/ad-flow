@@ -224,5 +224,6 @@ Legacy → New 점진 전환과 Shadow Traffic
 Current Phase: Phase 4
 상태: IN PROGRESS
 T4-01: DONE (Serving·Event 커넥션 결합 재현)
-다음: 분리 해법은 Human Gate 후, 개발자가 요청할 때
+T4-02: DONE (JVM 큐 접수, ADR 005)
+다음: FR-11 재처리·Kafka는 개발자가 요청할 때
 ```

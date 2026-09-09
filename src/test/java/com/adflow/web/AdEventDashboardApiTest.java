@@ -100,11 +100,7 @@ class AdEventDashboardApiTest {
                                 """.formatted(campaignId, creativeId)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.impressions", is(1)))
-                .andExpect(jsonPath("$.clicks", is(1)))
-                .andExpect(jsonPath("$.ctr", closeTo(1.0, 0.0001)));
+        awaitDashboard(campaignId, 1, 1);
 
         mockMvc.perform(get("/dashboard/summary"))
                 .andExpect(status().isOk())
@@ -157,5 +153,24 @@ class AdEventDashboardApiTest {
                 .andExpect(jsonPath("$.remainingBudget", is(0)))
                 .andExpect(jsonPath("$.budget", is(1)))
                 .andExpect(jsonPath("$.status", is("BUDGET_EXHAUSTED")));
+    }
+
+    private void awaitDashboard(int campaignId, int impressions, int clicks) throws Exception {
+        long deadline = System.currentTimeMillis() + 2000;
+        AssertionError last = null;
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.impressions", is(impressions)))
+                        .andExpect(jsonPath("$.clicks", is(clicks)))
+                        .andExpect(jsonPath("$.ctr", closeTo((double) clicks / impressions, 0.0001)));
+                return;
+            } catch (AssertionError error) {
+                last = error;
+                Thread.sleep(25);
+            }
+        }
+        throw last;
     }
 }

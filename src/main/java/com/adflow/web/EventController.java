@@ -23,7 +23,7 @@ public class EventController {
     @PostMapping("/events/impression")
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse impression(@RequestBody EventRequest request) {
-        return EventResponse.from(events.record(
+        return EventResponse.from(events.accept(
                 request.eventId(),
                 request.campaignId(),
                 request.creativeId(),
@@ -37,7 +37,7 @@ public class EventController {
     @PostMapping("/events/click")
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse click(@RequestBody EventRequest request) {
-        return EventResponse.from(events.record(
+        return EventResponse.from(events.accept(
                 request.eventId(),
                 request.campaignId(),
                 request.creativeId(),

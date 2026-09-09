@@ -1,33 +1,17 @@
 package com.adflow.web;
 
-import com.adflow.event.AdEvent;
-import com.adflow.event.AdEventRepository;
-import com.adflow.event.AdEventService;
-import com.adflow.event.AdEventType;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,16 +19,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
-        "spring.datasource.hikari.maximum-pool-size=1",
-        "spring.datasource.hikari.connection-timeout=8000"
+        "adflow.event.persist-delay-ms=400"
 })
 @AutoConfigureMockMvc
-@Import(ServingEventCouplingTest.SlowEventInsert.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class ServingEventCouplingTest {
 
-    static final long HOLD_MS = 400L;
-    static final CountDownLatch CONNECTION_HELD = new CountDownLatch(1);
+    private static final long HOLD_MS = 400L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,96 +33,53 @@ class ServingEventCouplingTest {
     private final JsonMapper json = JsonMapper.builder().build();
 
     @Test
-    void getAdsWaitsWhileEventInsertHoldsConnection() throws Exception {
+    void eventApiReturnsBeforePersistFinishes() throws Exception {
         int campaignId = createCampaign();
         int creativeId = addCreative(campaignId);
 
-        AtomicLong getElapsedMs = new AtomicLong();
+        long started = System.nanoTime();
+        mockMvc.perform(post("/events/impression")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "eventId": "couple-1",
+                                  "campaignId": %d,
+                                  "creativeId": %d,
+                                  "userId": 1,
+                                  "contentId": 1
+                                }
+                                """.formatted(campaignId, creativeId)))
+                .andExpect(status().isCreated());
+        long postMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
 
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        try {
-            Future<?> impression = pool.submit(() -> {
-                try {
-                    mockMvc.perform(post("/events/impression")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content("""
-                                            {
-                                              "eventId": "couple-1",
-                                              "campaignId": %d,
-                                              "creativeId": %d,
-                                              "userId": 1,
-                                              "contentId": 1
-                                            }
-                                            """.formatted(campaignId, creativeId)))
-                            .andExpect(status().isCreated());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            Future<?> select = pool.submit(() -> {
-                try {
-                    if (!CONNECTION_HELD.await(5, TimeUnit.SECONDS)) {
-                        throw new IllegalStateException("event insert did not hold a connection");
-                    }
-                    long started = System.nanoTime();
-                    mockMvc.perform(get("/ads").param("userId", "1").param("contentId", "1"))
-                            .andExpect(status().isOk());
-                    getElapsedMs.set(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            impression.get(10, TimeUnit.SECONDS);
-            select.get(10, TimeUnit.SECONDS);
-        } finally {
-            pool.shutdownNow();
-        }
-
-        long waitMs = getElapsedMs.get();
         Files.writeString(
-                Path.of(".agent/artifacts/T4-01/measurement.txt"),
-                "eventHoldMs=%d getAdsWaitMs=%d pool=1%n".formatted(HOLD_MS, waitMs)
+                Path.of(".agent/artifacts/T4-02/measurement.txt"),
+                "persistDelayMs=%d postMs=%d%n".formatted(HOLD_MS, postMs)
         );
 
-        assertThat(waitMs)
-                .as("GET /ads should wait while impression holds the only DB connection")
-                .isGreaterThanOrEqualTo(300L);
+        assertThat(postMs)
+                .as("POST /events/impression should return before persist delay")
+                .isLessThan(150L);
+
+        awaitImpressions(campaignId, 1);
     }
 
-    @TestConfiguration
-    static class SlowEventInsert {
-        @Bean
-        @Primary
-        AdEventService slowEventInsert(AdEventRepository events, PlatformTransactionManager transactions) {
-            TransactionTemplate tx = new TransactionTemplate(transactions);
-            return new AdEventService(events) {
-                @Override
-                public AdEvent record(
-                        String eventId,
-                        Long campaignId,
-                        Long creativeId,
-                        Long userId,
-                        Long contentId,
-                        AdEventType type,
-                        Instant occurredAt
-                ) {
-                    return tx.execute(status -> {
-                        AdEvent saved = events.save(AdEvent.record(
-                                eventId, campaignId, creativeId, userId, contentId, type, occurredAt));
-                        CONNECTION_HELD.countDown();
-                        try {
-                            Thread.sleep(HOLD_MS);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new IllegalStateException(e);
-                        }
-                        return saved;
-                    });
-                }
-            };
+    private void awaitImpressions(int campaignId, int expected) throws Exception {
+        long deadline = System.currentTimeMillis() + 3000;
+        Integer last = null;
+        while (System.currentTimeMillis() < deadline) {
+            String body = mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+            last = json.readTree(body).get("impressions").asInt();
+            if (last == expected) {
+                return;
+            }
+            Thread.sleep(25);
         }
+        assertThat(last).isEqualTo(expected);
     }
 
     private int createCampaign() throws Exception {

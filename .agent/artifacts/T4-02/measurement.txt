@@ -1,0 +1,1 @@
+persistDelayMs=400 postMs=2

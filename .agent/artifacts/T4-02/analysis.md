@@ -3,61 +3,61 @@
 ```text
 Task: T4-02
 Phase: 4
-Date: 2026-09-08
+Date: 2026-09-09
 ```
 
 ## 요청
 
-T4-01 다음. Serving과 이벤트 저장을 나누는 해법 Task로 보이지만, T4-01 Human Gate 후보가 아직 없다.
+T4-01 Human Gate에서 후보 A를 골랐다. 이벤트 API는 접수만 하고 INSERT는 같은 JVM 워커가 한다. Kafka는 이 Task가 아니다.
 
 ## 근거 문서
 
 ```text
-REQUIREMENTS  FR-11 분리·대량·재처리. Phase 완료이지 한 Task가 아님
-DESIGN        4절: 동기 INSERT. 12.4: Kafka는 목표. T4-01: 풀 결합만 재현
-ROADMAP       기술은 결과가 필요성을 말할 때만
-TASKS         T4-01 DONE. Kafka/Consumer는 Human Gate 전 금지
-              다음: 개발자 요청 → 이번 요청
-ADR           001: Task 하나. 해법 선택 없이 구현하지 않음
-T4-01         human-gate.md 상태 pending
-측정          eventHoldMs=400 getAdsWaitMs=409 pool=1
-              Tomcat 기아·운영 RPS 없음
+REQUIREMENTS  FR-11 분리. 재처리·대량은 Phase 완료. T4-02는 요청 경로 분리만
+DESIGN        4절: 동기 INSERT. 12.4: Kafka는 목표 그림
+ROADMAP       기술은 측정이 말할 때만. B는 이 측정으로 안 고름
+TASKS         T4-01 DONE. Kafka/Consumer는 Gate 전 금지 → 이제 A만 허가
+ADR           001: Task 하나. 005: JVM 큐 (작성)
+T4-01         human-gate A
 ```
 
 문서 충돌:
 
 ```text
-해법 구현을 막는다.
-T2-03은 Human Gate에서 A를 고른 뒤에만 Analysis가 Valid였다.
-여기서 A/B/C 없이 Plan을 쓰면 에이전트가 기술을 고른다.
+없음. 12.4 Kafka는 현재 구조가 아니다.
+워커도 같은 DataSource라 풀 결합은 남을 수 있다. 그건 A의 한계로 ADR에 적는다.
 ```
 
 현재 코드:
 
 ```text
-GET /ads 와 POST /events/* 같은 DataSource
-분리 없음
+EventController → AdEventService.record → save 후 HTTP 201
+ServingEventCouplingTest: record 안에서 sleep 하면 GET이 기다림
 ```
 
 ## 제약
 
 ```text
-이 요청에서 해도 되는 것
-  Human Gate를 다시 보고 후보만 고르게 한다
+해도 되는 것
+  BlockingQueue + 단일 persist 워커
+  POST는 큐 적재 후 201
+  대시보드는 워커 이후 수치 (테스트는 대기)
+  T4-01 테스트를 POST가 persist를 기다리지 않게 변경
 
 하면 안 되는 것
-  Kafka / JVM 큐 / 풀 튜닝 구현
-  후보를 임의로 A로 정한 Plan
+  Kafka / Redis / @KafkaListener
+  멱등 (FR-12)
+  Frequency Cap / Budget 변경
+  새 HTTP 경로
 ```
 
 ## 하지 않는 이유
 
-측정은 “풀=1에서 결합이 있다”뿐이다. B는 이 숫자로 필요성이 안 나온다.
-A도 유실·재처리 한계가 있어 사람이 골라야 한다.
+Kafka는 후보 B. 재처리는 유실 한계를 측정한 다음이다.
 
 ## Exit
 
 ```text
-Valid: no
-다음: Human Gate 후보 선택. plan.md 없음
+Valid: yes
+다음: plan.md
 ```

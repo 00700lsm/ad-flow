@@ -95,7 +95,7 @@ Current Phase
 
 Phase 4
 서빙과 이벤트 처리 결합
-코드: T4-01 같은 DB 풀에서 이벤트 INSERT가 GET /ads를 기다리게 함. Kafka 없음
+코드: T4-02 이벤트 API는 큐 접수 후 201. INSERT는 JVM 워커. Kafka 없음
 ```
 
 현재 구조:
@@ -106,7 +106,7 @@ Browser (console / player / dashboard-ui)
 Spring Boot
   ├─ Campaign / Creative CRUD
   ├─ Ad Selection (활성 / 기간 / 예산 잔여 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap·Budget)
-  ├─ Impression / Click 동기 저장  ← Dashboard 집계. 캡·예산 카운터가 아님
+  ├─ Impression / Click 접수 (JVM 큐) → 워커 INSERT  ← Dashboard 집계. 캡·예산 카운터가 아님
   └─ Dashboard 집계
   ↓
 PostgreSQL
@@ -114,7 +114,7 @@ PostgreSQL
 ```
 
 프론트는 Next.js가 아니라 Spring이 서빙하는 정적 HTML이다.
-이벤트는 Kafka 없이 같은 앱이 PostgreSQL에 저장한다.
+이벤트는 Kafka 없이 같은 앱의 메모리 큐와 워커가 PostgreSQL에 저장한다 (ADR 005). HTTP 201은 INSERT 완료를 기다리지 않는다.
 Frequency Cap 카운터는 `GET /ads`가 후보를 고를 때 `count < cap`인 행만 원자적으로 +1 한다.
 실패하면 다음 우선순위 캠페인을 시도한다. `frequencyCap = 0`은 올리지 않는다.
 Impression INSERT는 캡을 채우지 않는다. GET만 해도 슬롯은 줄어든다 (ADR 003).
@@ -124,7 +124,8 @@ T2-02 측정(해법 전): requests=16 selected=16 impressions=16 cap=1 overflow=
 T3-02 측정(해법 전): requests=16 selected=16 impressions=16 budget=1 spent=16 overflow=15.
 T3-03 테스트(해법 후, 동시 GET): requests=16 selected=1 budget=1 spent=1.
 T3-04에서 Dashboard에 spentBudget / remainingBudget / status를 붙였다. budget=1 고우선 다음 저우선이 나온다.
-T4-01 측정: eventHoldMs=400 getAdsWaitMs=409 pool=1. 해법(큐/Kafka)은 없음.
+T4-01 측정: eventHoldMs=400 getAdsWaitMs=409 pool=1.
+T4-02 측정: persistDelayMs=400 postMs=2. 프로세스 유실·워커와 GET의 풀 공유는 남음.
 
 아직 코드에 없는 것:
 
@@ -691,16 +692,18 @@ Overspending 여부
 
 ## 12.4 Phase 4. Kafka Event Pipeline
 
-Impression / Click 이벤트를 Kafka 기반으로 처리한다. **현재 코드는 아직 동기 INSERT**다.
+Impression / Click 이벤트를 Kafka 기반으로 처리한다. **현재 코드는 JVM 메모리 큐+워커**다. Kafka 없음.
 
-T4-01: 같은 Hikari 풀에서 이벤트 트랜잭션이 커넥션을 붙잡으면 GET `/ads`가 기다린다 (테스트 pool=1, getAdsWaitMs=409). Kafka는 없다.
+T4-01: 요청 스레드가 INSERT 커넥션을 붙잡으면 GET `/ads`가 기다렸다.
+T4-02 (ADR 005): POST는 큐 적재 후 201. persistDelayMs=400일 때 postMs=2.
 
-현재 코드 (T4-01):
+현재 코드 (T4-02):
 
 ```text
-GET /ads 와 POST /events/* 는 같은 DataSource
-이벤트 INSERT가 커넥션을 붙잡으면 선택이 대기한다
-분리 해법은 Human Gate 전
+POST /events/*  → 메모리 큐 → 201
+워커            → PostgreSQL INSERT
+GET /ads 와 워커는 같은 DataSource
+프로세스 종료 시 큐 유실
 ```
 
 ```text

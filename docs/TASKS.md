@@ -19,9 +19,9 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T4-01 DONE
+현재 Task: T4-02 DONE
 Phase 4: IN PROGRESS
-T3-01 ~ T3-04: DONE
+T4-01 ~ T4-02: DONE
 다음: Phase 4 다음 Task는 개발자가 요청할 때
 ```
 
@@ -46,7 +46,7 @@ Phase 3는 DONE이다. FR-11 전체를 한 Task로 구현하지 않는다.
 # 2. 이 Phase에서 하지 않는 것
 
 ```text
-Kafka / Redis / Consumer (Human Gate 전)
+Kafka / Redis / Consumer 재처리
 k6 / Prometheus / Grafana
 Traffic Simulator API
 SSE / WebSocket
@@ -65,6 +65,18 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T4-02. 이벤트 접수를 JVM 큐로 분리
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+POST /events/* 는 INSERT가 끝나기 전에 201을 줄 수 있다
+저장은 같은 JVM 워커가 한다
+Kafka 없음
+```
 
 ## T4-01. Serving·Event 커넥션 결합 재현
 
@@ -317,6 +329,7 @@ Phase 3:
 Phase 4:
 
 - [x] T4-01 Serving·Event 결합 재현
-- [ ] FR-11 분리 (Human Gate 후)
+- [x] T4-02 JVM 큐 접수 (ADR 005)
+- [ ] FR-11 Consumer 재처리 / Kafka
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
