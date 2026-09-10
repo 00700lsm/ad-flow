@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T7-10 DONE
-Phase 7: IN PROGRESS
-T7-01 ~ T7-10: DONE
-다음: Phase 7 다음 Task는 개발자가 요청할 때
+현재 Task: T7-11 DONE
+Phase 7: DONE (ADR 015)
+T7-01 ~ T7-11: DONE
+다음: Experiment는 개발자가 요청할 때
 ```
 
 ---
@@ -32,12 +32,12 @@ T7-01 ~ T7-10: DONE
 ```text
 Phase 7
 가상 사용자로 부하를 재현하는가
-상태: IN PROGRESS
+상태: DONE (ADR 015)
 ```
 
 목표:
 
-Simulator 시연 경로가 README에 있다. Phase 7 닫기는 이 Phase에서 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
+Phase 7 데모는 HTTP Simulator와 Dashboard 시연까지다. 연속 부하·k6·Kafka는 한계다.
 
 Phase 6는 DONE이다 (ADR 012).
 
@@ -65,6 +65,18 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T7-11. Phase 7 데모 범위 고정
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+FR-14 중 충족(HTTP Simulator·시연)과 한계(연속 부하·k6·Kafka)를 문서로 고정한다
+Phase 7를 데모 범위로 닫는다 (ADR 015)
+k6 / Kafka / 연속 루프 구현은 포함하지 않는다
+```
 
 ## T7-10. Simulator로 Dashboard 변화 시연
 
@@ -649,6 +661,8 @@ Phase 7:
 - [x] T7-08 30대 샘플 User
 - [x] T7-09 Simulator 폼 30대·clickRate
 - [x] T7-10 Simulator로 Dashboard 변화 시연
-- [ ] FR-14 Traffic Simulator
+- [x] T7-11 Phase 7 데모 범위 고정 (ADR 015)
+- [x] FR-14 HTTP Simulator (데모, T7-03~T7-10)
+- [ ] FR-14 연속 부하 / k6 / Kafka Event (ADR 015, Phase 7에서 미충족)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

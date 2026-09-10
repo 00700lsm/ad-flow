@@ -193,7 +193,7 @@ T6-01 측정: pollMs=3000 sse=0. 해법 A. 3초 폴링 감수 (ADR 011).
 
 ## Phase 7. 가상 사용자로 부하를 재현하는가
 
-상태: `IN PROGRESS`
+상태: `DONE`
 
 질문:
 
@@ -211,6 +211,7 @@ T7-07: clickRate100Clicks=2. 30대 시드 없음. FR-14 미충족.
 T7-08: thirtiesSpent=2. 폼 30대 없음. FR-14 미충족.
 T7-09: thirtiesShare=1 clickRate=1. FR-14 미충족.
 T7-10: impressions=2 clicks=2 spentBudget=2. FR-14 미충족.
+T7-11: Phase 7 데모 종료 HTTP Simulator (ADR 015). 연속 부하·k6·Kafka Event는 넣지 않음. FR-14 전문 미충족.
 
 성능 숫자(RPS 단계)는 이 Phase 이후 Experiment로 분리한다.
 
@@ -248,7 +249,7 @@ Legacy → New 점진 전환과 Shadow Traffic
 
 ```text
 Current Phase: Phase 7
-상태: IN PROGRESS
+상태: DONE (ADR 015)
 T7-01: DONE (해법 전 simulationsEndpoint=0)
 T7-02: DONE (다음 HTTP Simulator, ADR 013 C)
 T7-03: DONE (startRequestCount=2. 화면·분포 없음)
@@ -259,5 +260,6 @@ T7-07: DONE (clickRate100Clicks=2. 30대 시드 없음)
 T7-08: DONE (thirtiesSpent=2. 폼 30대 없음)
 T7-09: DONE (thirtiesShare=1 clickRate=1)
 T7-10: DONE (impressions=2 clicks=2 spentBudget=2)
-다음: Phase 7 다음 Task는 개발자가 요청할 때
+T7-11: DONE (데모 HTTP Simulator, ADR 015)
+다음: Experiment는 개발자가 요청할 때
 ```
