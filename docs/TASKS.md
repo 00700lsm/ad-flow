@@ -19,9 +19,9 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T4-04 DONE
+현재 Task: T4-05 DONE
 Phase 4: IN PROGRESS
-T4-01 ~ T4-04: DONE
+T4-01 ~ T4-05: DONE
 다음: Phase 4 다음 Task는 개발자가 요청할 때
 ```
 
@@ -65,6 +65,19 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T4-05. 워커 장애 후 재처리 불가 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+워커가 take 이후 INSERT 전에 죽으면, 재시작해도 그 Impression은 집계에 안 남는다
+재처리 불가를 테스트로 재현하고 남긴다
+Kafka / Outbox / 별도 Consumer는 포함하지 않는다
+Human Gate 전에 재처리를 넣지 않는다
+```
 
 ## T4-04. 워커 INSERT와 GET /ads 풀 공유 재현
 
@@ -358,6 +371,7 @@ Phase 4:
 - [x] T4-02 JVM 큐 접수 (ADR 005)
 - [x] T4-03 접수 직후 집계 공백 재현
 - [x] T4-04 워커·GET 풀 공유 재현
+- [x] T4-05 워커 장애 후 재처리 불가 재현
 - [ ] FR-11 Consumer 재처리 / Kafka (데모에서 A, ADR 006)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
