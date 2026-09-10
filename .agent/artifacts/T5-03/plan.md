@@ -3,7 +3,7 @@
 ```text
 Task: T5-03
 Phase: 5
-HITL: pending
+HITL: approved
 ```
 
 ## 완료 조건

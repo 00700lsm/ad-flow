@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T5-02 DONE
+현재 Task: T5-03 DONE
 Phase 5: IN PROGRESS
-T5-01 ~ T5-02: DONE
-다음: eventId UNIQUE (ADR 008 재검토)는 개발자가 요청할 때
+T5-01 ~ T5-03: DONE
+다음: Phase 5 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -65,6 +65,19 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T5-03. eventId UNIQUE 집계 한 번
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+같은 eventId로 POST /events/impression 3회면 Dashboard 노출은 1이다
+입력 3 / 유효 1 / 집계 증가량 1
+UNIQUE(eventId). 충돌 INSERT는 집계에 안 넣는다
+Kafka / Redis / exists-only 스킵은 포함하지 않는다
+```
 
 ## T5-02. Phase 5 다음 방향 고정
 
@@ -416,7 +429,8 @@ Phase 4:
 Phase 5:
 
 - [x] T5-01 동일 eventId 중복 집계 재현
-- [x] T5-02 다음 방향 UNIQUE (ADR 008 재검토, 미구현)
-- [ ] FR-12 멱등 (입력 3 / 유효 1 / 집계 +1)
+- [x] T5-02 다음 방향 UNIQUE (ADR 008 재검토)
+- [x] T5-03 eventId UNIQUE 집계 한 번 (ADR 009)
+- [x] FR-12 멱등 (입력 3 / 유효 1 / 집계 +1, T5-03 테스트)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

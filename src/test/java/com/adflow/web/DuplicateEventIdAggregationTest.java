@@ -28,7 +28,7 @@ class DuplicateEventIdAggregationTest {
     private final JsonMapper json = JsonMapper.builder().build();
 
     @Test
-    void sameEventIdPostedThriceIncreasesImpressionsThrice() throws Exception {
+    void sameEventIdPostedThriceAggregatesOnce() throws Exception {
         int campaignId = createCampaign();
         int creativeId = addCreative(campaignId);
 
@@ -50,11 +50,11 @@ class DuplicateEventIdAggregationTest {
         int aggregated = awaitImpressions(campaignId, 3);
 
         Files.writeString(
-                Path.of(".agent/artifacts/T5-01/measurement.txt"),
+                Path.of(".agent/artifacts/T5-03/measurement.txt"),
                 "posted=3 uniqueEventIds=1 aggregated=%d%n".formatted(aggregated)
         );
 
-        assertThat(aggregated).isEqualTo(3);
+        assertThat(aggregated).isOne();
     }
 
     private int impressions(int campaignId) throws Exception {

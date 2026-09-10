@@ -3,6 +3,7 @@ package com.adflow.event;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -65,10 +66,18 @@ public class AdEventService {
             while (!Thread.currentThread().isInterrupted()) {
                 AdEvent next = pending.take();
                 delayIfConfigured();
-                events.save(next);
+                persistIgnoringDuplicate(next);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void persistIgnoringDuplicate(AdEvent next) {
+        try {
+            events.save(next);
+        } catch (DataIntegrityViolationException ignored) {
+            // UNIQUE(eventId) — 집계는 한 행만
         }
     }
 

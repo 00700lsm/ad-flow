@@ -38,4 +38,5 @@ C  앱에서 조회 후 스킵
 하지 않는 것 UNIQUE, upsert, Kafka 멱등 Consumer
 남은 한계    같은 eventId → 집계가 횟수만큼 증가
 다음에 볼 때 중복이 제품 문제면 B 또는 C를 다시 Human Gate
+상태        대체됨: ADR 009 (T5-02 C, T5-03)
 ```

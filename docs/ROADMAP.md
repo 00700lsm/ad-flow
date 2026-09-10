@@ -170,6 +170,8 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 입력 3건 / 유효 1건 / 집계 증가량 1
 ```
 
+T5-03 테스트: posted=3 aggregated=1 (ADR 009).
+
 ---
 
 ## Phase 6. 운영자가 이벤트를 보는가
@@ -227,7 +229,8 @@ Legacy → New 점진 전환과 Shadow Traffic
 ```text
 Current Phase: Phase 5
 상태: IN PROGRESS
-T5-01: DONE (동일 eventId 중복 집계 재현, Human Gate A = ADR 008)
-T5-02: DONE (후보 C. UNIQUE로 진행, 미구현)
-다음: eventId UNIQUE는 개발자가 요청할 때
+T5-01: DONE (동일 eventId 중복 집계 재현)
+T5-02: DONE (후보 C. UNIQUE로 진행)
+T5-03: DONE (eventId UNIQUE, ADR 009)
+다음: Phase 5 다음 Task는 개발자가 요청할 때
 ```
