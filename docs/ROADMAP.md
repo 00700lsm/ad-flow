@@ -228,5 +228,6 @@ Legacy → New 점진 전환과 Shadow Traffic
 Current Phase: Phase 5
 상태: IN PROGRESS
 T5-01: DONE (동일 eventId 중복 집계 재현, Human Gate A = ADR 008)
-다음: Phase 5 다음 Task는 개발자가 요청할 때
+T5-02: DONE (후보 C. UNIQUE로 진행, 미구현)
+다음: eventId UNIQUE는 개발자가 요청할 때
 ```
