@@ -77,6 +77,37 @@ class SimulationApiTest {
     }
 
     @Test
+    void startRecordsImpressionsOnDashboard() throws Exception {
+        int campaignId = createSportsCampaign(10);
+
+        mockMvc.perform(post("/simulations/" + createSimulation(2) + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(2)));
+
+        mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(2)));
+        awaitImpressions(campaignId, 2);
+        writeImpressionMeasurement();
+    }
+
+    @Test
+    void stopBeforeStartIssuesNoImpressions() throws Exception {
+        int campaignId = createSportsCampaign(10);
+        long id = createSimulation(2);
+
+        mockMvc.perform(post("/simulations/" + id + "/stop"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/simulations/" + id + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(0)));
+
+        awaitImpressions(campaignId, 0);
+        writeImpressionMeasurement();
+    }
+
+    @Test
     void createStoresDistribution() throws Exception {
         mockMvc.perform(post("/simulations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,6 +179,31 @@ class SimulationApiTest {
                 Path.of(".agent/artifacts/T7-04/measurement.txt"),
                 "dramaOnlySpent=2 sportsWhenDramaOnly=0 splitSports=1 splitDrama=1\n"
         );
+    }
+
+    private void writeImpressionMeasurement() throws Exception {
+        Files.createDirectories(Path.of(".agent/artifacts/T7-06"));
+        Files.writeString(
+                Path.of(".agent/artifacts/T7-06/measurement.txt"),
+                "startImpressions=2 stopBeforeStartImpressions=0\n"
+        );
+    }
+
+    private void awaitImpressions(int campaignId, int impressions) throws Exception {
+        long deadline = System.currentTimeMillis() + 2000;
+        AssertionError last = null;
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.impressions", is(impressions)));
+                return;
+            } catch (AssertionError error) {
+                last = error;
+                Thread.sleep(25);
+            }
+        }
+        throw last;
     }
 
     private long createSimulation(int concurrentUsers) throws Exception {

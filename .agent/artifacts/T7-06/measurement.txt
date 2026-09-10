@@ -1,0 +1,1 @@
+startImpressions=2 stopBeforeStartImpressions=0

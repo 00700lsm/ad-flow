@@ -1,13 +1,18 @@
 package com.adflow.simulation;
 
 import com.adflow.ads.AdServingService;
+import com.adflow.ads.SelectedAd;
+import com.adflow.event.AdEventService;
+import com.adflow.event.AdEventType;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,11 +25,13 @@ public class SimulationService {
     static final long CONTENT_DRAMA = 2L;
 
     private final AdServingService ads;
+    private final AdEventService events;
     private final AtomicLong ids = new AtomicLong();
     private final Map<Long, Simulation> simulations = new ConcurrentHashMap<>();
 
-    public SimulationService(AdServingService ads) {
+    public SimulationService(AdServingService ads, AdEventService events) {
         this.ads = ads;
+        this.events = events;
     }
 
     public Simulation create(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories) {
@@ -51,7 +58,18 @@ public class SimulationService {
         List<String> cats = expandCategories(simulation.getCategories(), n);
         int count = 0;
         for (int i = 0; i < n; i++) {
-            ads.select(userId(ages.get(i)), contentId(cats.get(i)));
+            long userId = userId(ages.get(i));
+            long contentId = contentId(cats.get(i));
+            SelectedAd selected = ads.select(userId, contentId);
+            events.accept(
+                    UUID.randomUUID().toString(),
+                    selected.campaignId(),
+                    selected.creativeId(),
+                    userId,
+                    contentId,
+                    AdEventType.IMPRESSION,
+                    Instant.now()
+            );
             count++;
         }
         simulation.setRequestCount(count);

@@ -206,6 +206,7 @@ T7-02: 다음은 POST /simulations · start · stop (ADR 013).
 T7-03: startRequestCount=2. 화면·분포 없음. FR-14 미충족.
 T7-04: dramaOnlySpent=2 splitSports=1. 화면·Impression 없음. FR-14 미충족.
 T7-05: simulatorHtml=1. Impression 루프 없음. FR-14 미충족.
+T7-06: startImpressions=2. Click 없음. FR-14 미충족.
 
 성능 숫자(RPS 단계)는 이 Phase 이후 Experiment로 분리한다.
 
@@ -249,5 +250,6 @@ T7-02: DONE (다음 HTTP Simulator, ADR 013 C)
 T7-03: DONE (startRequestCount=2. 화면·분포 없음)
 T7-04: DONE (dramaOnlySpent=2. 화면·Impression 없음)
 T7-05: DONE (simulatorHtml=1. Impression 루프 없음)
+T7-06: DONE (startImpressions=2. Click 없음)
 다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```
