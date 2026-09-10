@@ -19,9 +19,9 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T4-02 DONE
+현재 Task: T4-03 DONE
 Phase 4: IN PROGRESS
-T4-01 ~ T4-02: DONE
+T4-01 ~ T4-03: DONE
 다음: Phase 4 다음 Task는 개발자가 요청할 때
 ```
 
@@ -65,6 +65,19 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T4-03. 접수 직후 집계 공백 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+POST /events/impression 201 직후 Dashboard 노출이 아직 0일 수 있다
+accepted=1 persisted=0 창을 테스트로 재현한다
+Kafka / Outbox / 재처리 Consumer는 포함하지 않는다
+Human Gate 전에 유실을 없애지 않는다
+```
 
 ## T4-02. 이벤트 접수를 JVM 큐로 분리
 
@@ -330,6 +343,7 @@ Phase 4:
 
 - [x] T4-01 Serving·Event 결합 재현
 - [x] T4-02 JVM 큐 접수 (ADR 005)
-- [ ] FR-11 Consumer 재처리 / Kafka
+- [x] T4-03 접수 직후 집계 공백 재현
+- [ ] FR-11 Consumer 재처리 / Kafka (데모에서 A, ADR 006)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

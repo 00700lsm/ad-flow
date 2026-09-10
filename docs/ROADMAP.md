@@ -225,5 +225,7 @@ Current Phase: Phase 4
 상태: IN PROGRESS
 T4-01: DONE (Serving·Event 커넥션 결합 재현)
 T4-02: DONE (JVM 큐 접수, ADR 005)
-다음: FR-11 재처리·Kafka는 개발자가 요청할 때
+T4-03: DONE (접수 직후 집계 공백 재현)
+유실: A 선택 (데모 감수, ADR 006)
+다음: Phase 4 남은 항목은 개발자가 요청할 때
 ```

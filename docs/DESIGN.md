@@ -126,6 +126,7 @@ T3-03 테스트(해법 후, 동시 GET): requests=16 selected=1 budget=1 spent=1
 T3-04에서 Dashboard에 spentBudget / remainingBudget / status를 붙였다. budget=1 고우선 다음 저우선이 나온다.
 T4-01 측정: eventHoldMs=400 getAdsWaitMs=409 pool=1.
 T4-02 측정: persistDelayMs=400 postMs=2. 프로세스 유실·워커와 GET의 풀 공유는 남음.
+T4-03 측정: accepted=1 persistedImmediately=0 persistedAfterWait=1. 내구성 해법 없음.
 
 아직 코드에 없는 것:
 
@@ -696,6 +697,8 @@ Impression / Click 이벤트를 Kafka 기반으로 처리한다. **현재 코드
 
 T4-01: 요청 스레드가 INSERT 커넥션을 붙잡으면 GET `/ads`가 기다렸다.
 T4-02 (ADR 005): POST는 큐 적재 후 201. persistDelayMs=400일 때 postMs=2.
+T4-03: 워커 delay 중 Dashboard 노출은 0. 살아 있으면 이후 1.
+데모에서는 그 창의 유실을 감수한다 (ADR 006). Outbox / Kafka 없음.
 
 현재 코드 (T4-02):
 
@@ -703,7 +706,7 @@ T4-02 (ADR 005): POST는 큐 적재 후 201. persistDelayMs=400일 때 postMs=2.
 POST /events/*  → 메모리 큐 → 201
 워커            → PostgreSQL INSERT
 GET /ads 와 워커는 같은 DataSource
-프로세스 종료 시 큐 유실
+프로세스 종료 시 큐 유실 (데모에서 감수, ADR 006)
 ```
 
 ```text

@@ -1,0 +1,1 @@
+accepted=1 persistedImmediately=0 persistedAfterWait=1 persistDelayMs=400

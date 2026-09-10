@@ -34,6 +34,7 @@ Redis 도입 여부
 Kafka 도입 여부
 Budget / Frequency Cap 동시성 제어 방식
 이벤트 저장을 Serving API와 분리할지 → `005-event-async-in-jvm-queue.md`
+데모에서 큐 유실을 감수할지 → `006-accept-in-memory-event-queue-loss.md`
 Source of Truth와 Realtime Counter를 나눌지
 프로젝트 Scope 변경
 Phase 완료 조건을 바꿀지
