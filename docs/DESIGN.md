@@ -95,9 +95,9 @@ Current Phase
 
 Phase 7 IN PROGRESS
 가상 사용자로 부하를 재현하는가
-코드: POST /simulations · start · stop. simulator.html. start는 Impression 후 clickRate 슬롯에 Click
-T7-07 측정: clickRate100Clicks=2 clickRateOmittedClicks=0 stopBeforeStartClicks=0
-30대 시드 없음
+코드: POST /simulations · start · stop. simulator.html. User 3(35). 30대→User 3
+T7-08 측정: thirtiesSpent=2 twentiesWhenThirtiesOnly=0
+시뮬레이터 폼 30대·clickRate 없음
 ```
 
 현재 구조:
@@ -109,7 +109,7 @@ Spring Boot
   ├─ Campaign / Creative CRUD
   ├─ Ad Selection (활성 / 기간 / 예산 잔여 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap·Budget)
   ├─ Impression / Click 접수 (JVM 큐) → 워커 INSERT  ← Dashboard 집계. 캡·예산 카운터가 아님
-  ├─ Simulations (메모리. start는 ageShares·categories로 순차 GET /ads 후 Impression, clickRate 슬롯에 Click)
+  ├─ Simulations (메모리. start는 ageShares·categories로 순차 GET /ads. 20대→1 30대→3 40대→2. Impression, clickRate Click)
   └─ Dashboard 집계
   ↓
 PostgreSQL
@@ -147,13 +147,14 @@ T7-04 측정: dramaOnlySpent=2 sportsWhenDramaOnly=0 splitSports=1 splitDrama=1.
 T7-05 측정: simulatorHtml=1 indexLink=1 postsStartStop=1. Impression 루프 없음.
 T7-06 측정: startImpressions=2 stopBeforeStartImpressions=0. Click 없음.
 T7-07 측정: clickRate100Clicks=2 clickRateOmittedClicks=0 stopBeforeStartClicks=0. 30대 시드 없음.
+T7-08 측정: thirtiesSpent=2 twentiesWhenThirtiesOnly=0. 폼 30대 없음.
 
 아직 코드에 없는 것:
 
 ```text
 Redis
 Kafka
-30대 시드
+시뮬레이터 폼 30대·clickRate
 SSE / WebSocket
 Mock Ad Exchange
 ```
@@ -512,6 +513,7 @@ T7-04: ageShares · categories. 20대→User 1, 40대→User 2. 스포츠→Cont
 T7-05: GET /simulator.html. 폼이 create·start·stop 호출. Impression 없음.
 T7-06: start가 선택마다 Impression. Click 없음.
 T7-07: clickRate. 100이면 clicks=2. 생략이면 0. 30대 시드 없음.
+T7-08: 30대→User 3(35). thirtiesSpent=2. 폼 없음.
 ```
 
 ---
@@ -827,6 +829,7 @@ T7-04: ageShares·categories. dramaOnlySpent=2 splitSports=1. 화면·Impression
 T7-05: simulatorHtml=1. Impression 루프 없음.
 T7-06: startImpressions=2. Click 없음.
 T7-07: clickRate100Clicks=2. 30대 시드 없음.
+T7-08: thirtiesSpent=2. 폼 30대 없음.
 
 가상의 사용자를 생성하여 광고 요청을 발생시킨다.
 

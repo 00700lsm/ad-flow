@@ -217,11 +217,43 @@ class SimulationApiTest {
         writeMeasurement();
     }
 
+    @Test
+    void startUsesThirtiesUserWhenOnlyThirtiesAndSports() throws Exception {
+        int twentiesId = createCampaign("sim-20s", 10, 20, 29, "스포츠");
+        int thirtiesId = createCampaign("sim-30s", 10, 30, 39, "스포츠");
+
+        mockMvc.perform(post("/simulations/" + createSimulation("""
+                        {
+                          "concurrentUsers": 2,
+                          "ageShares": { "30대": 100 },
+                          "categories": ["스포츠"]
+                        }
+                        """) + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(2)));
+
+        mockMvc.perform(get("/dashboard/campaigns/" + thirtiesId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(2)));
+        mockMvc.perform(get("/dashboard/campaigns/" + twentiesId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(0)));
+        writeThirtiesMeasurement();
+    }
+
     private void writeMeasurement() throws Exception {
         Files.createDirectories(Path.of(".agent/artifacts/T7-04"));
         Files.writeString(
                 Path.of(".agent/artifacts/T7-04/measurement.txt"),
                 "dramaOnlySpent=2 sportsWhenDramaOnly=0 splitSports=1 splitDrama=1\n"
+        );
+    }
+
+    private void writeThirtiesMeasurement() throws Exception {
+        Files.createDirectories(Path.of(".agent/artifacts/T7-08"));
+        Files.writeString(
+                Path.of(".agent/artifacts/T7-08/measurement.txt"),
+                "thirtiesSpent=2 twentiesWhenThirtiesOnly=0\n"
         );
     }
 

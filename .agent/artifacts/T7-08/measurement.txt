@@ -1,0 +1,1 @@
+thirtiesSpent=2 twentiesWhenThirtiesOnly=0

@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T7-08 Plan HITL
+현재 Task: T7-09 Plan HITL
 Phase 7: IN PROGRESS
-T7-01 ~ T7-07: DONE
-다음: T7-08 승인 후 Red
+T7-01 ~ T7-08: DONE
+다음: T7-09 승인 후 Red
 ```
 
 ---
@@ -37,7 +37,7 @@ Phase 7
 
 목표:
 
-start가 30대 슬롯을 샘플 User 3으로 고른다. 시뮬레이터 폼 30대·clickRate는 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
+시뮬레이터 폼에 30대와 clickRate를 넣는다. FR-14 전체를 한 Task로 구현하지 않는다.
 
 Phase 6는 DONE이다 (ADR 012).
 
@@ -66,9 +66,22 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
 
-## T7-08. 30대 샘플 User
+## T7-09. Simulator 폼 30대·clickRate
 
 상태: `TODO`
+
+완료 조건:
+
+```text
+simulator.html에 30대 %와 clickRate가 있다
+POST /simulations body에 ageShares 30대와 clickRate가 들어간다
+기존 20대·40대·장르·start/stop은 유지한다
+새 API / k6 / Kafka는 포함하지 않는다
+```
+
+## T7-08. 30대 샘플 User
+
+상태: `DONE`
 
 완료 조건:
 
@@ -621,6 +634,7 @@ Phase 7:
 - [x] T7-05 Simulator 화면
 - [x] T7-06 start 후 Impression
 - [x] T7-07 start 후 Click
+- [x] T7-08 30대 샘플 User
 - [ ] FR-14 Traffic Simulator
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

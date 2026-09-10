@@ -25,6 +25,9 @@ public class SampleDataLoader implements ApplicationRunner {
             users.save(new User(1L, 28, "스포츠"));
             users.save(new User(2L, 45, "드라마"));
         }
+        if (users.findById(3L).isEmpty()) {
+            users.save(new User(3L, 35, "스포츠"));
+        }
         if (contents.count() == 0) {
             contents.save(new Content(1L, "축구 하이라이트", "스포츠"));
             contents.save(new Content(2L, "로맨스 드라마", "드라마"));

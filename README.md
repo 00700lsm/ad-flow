@@ -32,14 +32,14 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 Phase 7
 가상 사용자로 부하를 재현하는가
 T7-01 공백 재현. T7-02 제품 HTTP (ADR 013)
-T7-03 POST /simulations start/stop. T7-04 연령·장르 분포. T7-05 simulator.html. T7-06 Impression. T7-07 clickRate Click. 30대 시드 없음
+T7-03 POST /simulations start/stop. T7-04 연령·장르 분포. T7-05 simulator.html. T7-06 Impression. T7-07 clickRate Click. T7-08 User 3(30대). 폼 30대 없음
 Redis / Kafka 없음
 ```
 
 Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click / 사용 예산 / 상태를 확인할 수 있다.
 
 `GET /ads`가 후보를 고를 때 당일 캡 카운터와 예산을 원자적으로 올린다. 한도·예산에 걸린 캠페인은 다음 후보가 있으면 그 광고를 고른다. Impression은 Dashboard 집계용이며 캡·예산 카운터가 아니다.
-동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Kafka는 없다. Simulator는 POST /simulations와 simulator.html이 있고 start가 Impression과 clickRate만큼 Click을 남긴다. 30대 시드는 없다.
+동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Kafka는 없다. Simulator는 POST /simulations와 simulator.html이 있고 start가 Impression과 clickRate만큼 Click을 남긴다. 30대는 User 3이다. 시뮬레이터 폼에 30대·clickRate는 없다.
 
 ---
 
@@ -80,7 +80,7 @@ Player   mediaUrl이 .mp4이면 <video>로 재생한다
 
 S3 / 파일 업로드 API / CDN은 없다. 영상을 바꾸려면 리소스 폴더에 파일을 넣고 소재 URL만 맞추면 된다.
 
-샘플: 사용자 1(28세, 스포츠) + 콘텐츠 1(축구 하이라이트)에 스포츠 캠페인이 붙는다.
+샘플: 사용자 1(28세, 스포츠), 사용자 3(35세, 스포츠) + 콘텐츠 1(축구 하이라이트)에 스포츠 캠페인이 붙는다.
 
 Frequency Cap을 Player에서 보려면 Console에서 같은 타겟(20–39세, 스포츠) 캠페인 두 개를 만든다.
 

@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SimulationService {
 
     static final long USER_TWENTIES = 1L;
+    static final long USER_THIRTIES = 3L;
     static final long USER_FORTIES = 2L;
     static final long CONTENT_SPORTS = 1L;
     static final long CONTENT_DRAMA = 2L;
@@ -153,7 +154,13 @@ public class SimulationService {
     }
 
     static long userId(String ageBand) {
-        return "40대".equals(ageBand) ? USER_FORTIES : USER_TWENTIES;
+        if ("40대".equals(ageBand)) {
+            return USER_FORTIES;
+        }
+        if ("30대".equals(ageBand)) {
+            return USER_THIRTIES;
+        }
+        return USER_TWENTIES;
     }
 
     static long contentId(String category) {
