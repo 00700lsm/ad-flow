@@ -1,0 +1,1 @@
+workerHoldMs=400 getAdsWaitMs=425 postMs=2 pool=1

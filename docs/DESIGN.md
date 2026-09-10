@@ -127,6 +127,7 @@ T3-04에서 Dashboard에 spentBudget / remainingBudget / status를 붙였다. bu
 T4-01 측정: eventHoldMs=400 getAdsWaitMs=409 pool=1.
 T4-02 측정: persistDelayMs=400 postMs=2. 프로세스 유실·워커와 GET의 풀 공유는 남음.
 T4-03 측정: accepted=1 persistedImmediately=0 persistedAfterWait=1. 내구성 해법 없음.
+T4-04 측정: workerHoldMs=400 getAdsWaitMs=431 postMs=3 pool=1. 풀 분리 없음.
 
 아직 코드에 없는 것:
 
@@ -699,6 +700,7 @@ T4-01: 요청 스레드가 INSERT 커넥션을 붙잡으면 GET `/ads`가 기다
 T4-02 (ADR 005): POST는 큐 적재 후 201. persistDelayMs=400일 때 postMs=2.
 T4-03: 워커 delay 중 Dashboard 노출은 0. 살아 있으면 이후 1.
 데모에서는 그 창의 유실을 감수한다 (ADR 006). Outbox / Kafka 없음.
+T4-04: 워커가 INSERT 커넥션을 붙잡으면 GET `/ads`가 기다렸다. workerHoldMs=400 getAdsWaitMs=431 pool=1.
 
 현재 코드 (T4-02):
 
