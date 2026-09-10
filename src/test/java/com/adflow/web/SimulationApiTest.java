@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -75,41 +76,115 @@ class SimulationApiTest {
         writeMeasurement();
     }
 
+    @Test
+    void createStoresDistribution() throws Exception {
+        mockMvc.perform(post("/simulations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "concurrentUsers": 2,
+                                  "ageShares": { "20대": 50, "40대": 50 },
+                                  "categories": ["스포츠", "드라마"]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.concurrentUsers", is(2)))
+                .andExpect(jsonPath("$.ageShares['20대']", is(50)))
+                .andExpect(jsonPath("$.ageShares['40대']", is(50)))
+                .andExpect(jsonPath("$.categories", contains("스포츠", "드라마")));
+    }
+
+    @Test
+    void startUsesDramaUserWhenOnlyFortiesAndDrama() throws Exception {
+        int sportsId = createCampaign("sim-sports", 10, 20, 39, "스포츠");
+        int dramaId = createCampaign("sim-drama", 10, 40, 59, "드라마");
+
+        mockMvc.perform(post("/simulations/" + createSimulation("""
+                        {
+                          "concurrentUsers": 2,
+                          "ageShares": { "40대": 100 },
+                          "categories": ["드라마"]
+                        }
+                        """) + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(2)));
+
+        mockMvc.perform(get("/dashboard/campaigns/" + dramaId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(2)));
+        mockMvc.perform(get("/dashboard/campaigns/" + sportsId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(0)));
+        writeMeasurement();
+    }
+
+    @Test
+    void startSplitsAcrossAgeAndCategory() throws Exception {
+        int sportsId = createCampaign("sim-sports", 10, 20, 39, "스포츠");
+        int dramaId = createCampaign("sim-drama", 10, 40, 59, "드라마");
+
+        mockMvc.perform(post("/simulations/" + createSimulation("""
+                        {
+                          "concurrentUsers": 2,
+                          "ageShares": { "20대": 50, "40대": 50 },
+                          "categories": ["스포츠", "드라마"]
+                        }
+                        """) + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(2)));
+
+        mockMvc.perform(get("/dashboard/campaigns/" + sportsId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(1)));
+        mockMvc.perform(get("/dashboard/campaigns/" + dramaId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.spentBudget", is(1)));
+        writeMeasurement();
+    }
+
     private void writeMeasurement() throws Exception {
-        Files.createDirectories(Path.of(".agent/artifacts/T7-03"));
+        Files.createDirectories(Path.of(".agent/artifacts/T7-04"));
         Files.writeString(
-                Path.of(".agent/artifacts/T7-03/measurement.txt"),
-                "simulationsEndpoint=1 startRequestCount=2 stopBeforeStartRequestCount=0\n"
+                Path.of(".agent/artifacts/T7-04/measurement.txt"),
+                "dramaOnlySpent=2 sportsWhenDramaOnly=0 splitSports=1 splitDrama=1\n"
         );
     }
 
     private long createSimulation(int concurrentUsers) throws Exception {
+        return createSimulation("""
+                { "concurrentUsers": %d }
+                """.formatted(concurrentUsers));
+    }
+
+    private long createSimulation(String body) throws Exception {
         MvcResult created = mockMvc.perform(post("/simulations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                { "concurrentUsers": %d }
-                                """.formatted(concurrentUsers)))
+                        .content(body))
                 .andExpect(status().isCreated())
                 .andReturn();
         return json.readTree(created.getResponse().getContentAsString()).get("id").asLong();
     }
 
     private int createSportsCampaign(int budget) throws Exception {
+        return createCampaign("sim-sports", budget, 20, 39, "스포츠");
+    }
+
+    private int createCampaign(String name, int budget, int ageMin, int ageMax, String category) throws Exception {
         MvcResult created = mockMvc.perform(post("/campaigns")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "sim-sports",
+                                  "name": "%s",
                                   "budget": %d,
                                   "startAt": "2026-01-01T00:00:00Z",
                                   "endAt": "2026-12-31T23:59:59Z",
                                   "priority": 5,
-                                  "targetAgeMin": 20,
-                                  "targetAgeMax": 39,
-                                  "targetCategory": "스포츠",
+                                  "targetAgeMin": %d,
+                                  "targetAgeMax": %d,
+                                  "targetCategory": "%s",
                                   "frequencyCap": 0
                                 }
-                                """.formatted(budget)))
+                                """.formatted(name, budget, ageMin, ageMax, category)))
                 .andExpect(status().isCreated())
                 .andReturn();
         int campaignId = json.readTree(created.getResponse().getContentAsString()).get("id").asInt();

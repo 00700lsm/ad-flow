@@ -3,6 +3,10 @@ package com.adflow.simulation;
 import com.adflow.ads.AdServingService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -10,8 +14,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class SimulationService {
 
-    static final long SAMPLE_USER_ID = 1L;
-    static final long SAMPLE_CONTENT_ID = 1L;
+    static final long USER_TWENTIES = 1L;
+    static final long USER_FORTIES = 2L;
+    static final long CONTENT_SPORTS = 1L;
+    static final long CONTENT_DRAMA = 2L;
 
     private final AdServingService ads;
     private final AtomicLong ids = new AtomicLong();
@@ -21,11 +27,16 @@ public class SimulationService {
         this.ads = ads;
     }
 
-    public Simulation create(int concurrentUsers) {
+    public Simulation create(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories) {
         if (concurrentUsers < 1) {
             throw new IllegalArgumentException("concurrentUsers는 1 이상이어야 합니다");
         }
-        Simulation simulation = new Simulation(ids.incrementAndGet(), concurrentUsers);
+        Simulation simulation = new Simulation(
+                ids.incrementAndGet(),
+                concurrentUsers,
+                defaultAgeShares(ageShares),
+                defaultCategories(categories)
+        );
         simulations.put(simulation.getId(), simulation);
         return simulation;
     }
@@ -35,9 +46,12 @@ public class SimulationService {
         if (!simulation.beginStart()) {
             return simulation;
         }
+        int n = simulation.getConcurrentUsers();
+        List<String> ages = expandShares(simulation.getAgeShares(), n);
+        List<String> cats = expandCategories(simulation.getCategories(), n);
         int count = 0;
-        for (int i = 0; i < simulation.getConcurrentUsers(); i++) {
-            ads.select(SAMPLE_USER_ID, SAMPLE_CONTENT_ID);
+        for (int i = 0; i < n; i++) {
+            ads.select(userId(ages.get(i)), contentId(cats.get(i)));
             count++;
         }
         simulation.setRequestCount(count);
@@ -56,5 +70,67 @@ public class SimulationService {
             throw new IllegalArgumentException("시뮬레이션을 찾을 수 없습니다: " + id);
         }
         return simulation;
+    }
+
+    private static Map<String, Integer> defaultAgeShares(Map<String, Integer> ageShares) {
+        if (ageShares == null || ageShares.isEmpty()) {
+            LinkedHashMap<String, Integer> defaults = new LinkedHashMap<>();
+            defaults.put("20대", 100);
+            return defaults;
+        }
+        return new LinkedHashMap<>(ageShares);
+    }
+
+    private static List<String> defaultCategories(List<String> categories) {
+        if (categories == null || categories.isEmpty()) {
+            return List.of("스포츠");
+        }
+        return new ArrayList<>(categories);
+    }
+
+    private static final List<String> AGE_ORDER = List.of("20대", "30대", "40대");
+
+    static List<String> expandShares(Map<String, Integer> shares, int total) {
+        List<String> keys = new ArrayList<>();
+        for (String band : AGE_ORDER) {
+            if (shares.containsKey(band)) {
+                keys.add(band);
+            }
+        }
+        for (String key : shares.keySet()) {
+            if (!keys.contains(key)) {
+                keys.add(key);
+            }
+        }
+        List<String> slots = new ArrayList<>();
+        int remaining = total;
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i);
+            int n = i == keys.size() - 1 ? remaining : total * shares.get(key) / 100;
+            remaining -= n;
+            for (int j = 0; j < n; j++) {
+                slots.add(key);
+            }
+        }
+        return slots;
+    }
+
+    static List<String> expandCategories(List<String> categories, int total) {
+        if (categories.size() == 1) {
+            return Collections.nCopies(total, categories.get(0));
+        }
+        List<String> slots = new ArrayList<>();
+        for (int i = 0; i < total; i++) {
+            slots.add(categories.get(i % categories.size()));
+        }
+        return slots;
+    }
+
+    static long userId(String ageBand) {
+        return "40대".equals(ageBand) ? USER_FORTIES : USER_TWENTIES;
+    }
+
+    static long contentId(String category) {
+        return "드라마".equals(category) ? CONTENT_DRAMA : CONTENT_SPORTS;
     }
 }

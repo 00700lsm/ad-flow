@@ -1,0 +1,1 @@
+dramaOnlySpent=2 sportsWhenDramaOnly=0 splitSports=1 splitDrama=1

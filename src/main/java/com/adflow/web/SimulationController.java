@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 public class SimulationController {
 
@@ -21,7 +24,9 @@ public class SimulationController {
     @PostMapping("/simulations")
     @ResponseStatus(HttpStatus.CREATED)
     public SimulationResponse create(@RequestBody CreateRequest request) {
-        return SimulationResponse.from(simulations.create(request.concurrentUsers()));
+        return SimulationResponse.from(
+                simulations.create(request.concurrentUsers(), request.ageShares(), request.categories())
+        );
     }
 
     @PostMapping("/simulations/{id}/start")
@@ -34,14 +39,23 @@ public class SimulationController {
         return SimulationResponse.from(simulations.stop(id));
     }
 
-    public record CreateRequest(int concurrentUsers) {
+    public record CreateRequest(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories) {
     }
 
-    public record SimulationResponse(long id, int concurrentUsers, int requestCount, String status) {
+    public record SimulationResponse(
+            long id,
+            int concurrentUsers,
+            Map<String, Integer> ageShares,
+            List<String> categories,
+            int requestCount,
+            String status
+    ) {
         static SimulationResponse from(Simulation simulation) {
             return new SimulationResponse(
                     simulation.getId(),
                     simulation.getConcurrentUsers(),
+                    simulation.getAgeShares(),
+                    simulation.getCategories(),
                     simulation.getRequestCount(),
                     simulation.getStatus().name()
             );
