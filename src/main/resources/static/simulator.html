@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>User Simulator</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<nav>
+  <a href="/">Home</a>
+  <a href="/console.html">Console</a>
+  <a href="/player.html">Player</a>
+  <a href="/dashboard.html">Dashboard</a>
+  <a href="/simulator.html">Simulator</a>
+</nav>
+<main>
+  <h1>User Simulator</h1>
+  <div class="panel">
+    <form id="form">
+      <label>동시 사용자</label>
+      <input id="concurrentUsers" name="concurrentUsers" type="number" min="1" value="2" required>
+      <div class="row">
+        <div>
+          <label>20대 %</label>
+          <input id="age20" name="age20" type="number" min="0" max="100" value="50" required>
+        </div>
+        <div>
+          <label>40대 %</label>
+          <input id="age40" name="age40" type="number" min="0" max="100" value="50" required>
+        </div>
+      </div>
+      <label>콘텐츠</label>
+      <label><input id="catSports" type="checkbox" checked> 스포츠</label>
+      <label><input id="catDrama" type="checkbox" checked> 드라마</label>
+      <button type="submit">Simulation</button>
+      <button type="button" id="stop">Stop</button>
+    </form>
+    <p id="result" class="muted"></p>
+  </div>
+</main>
+<script>
+let simulationId = null;
+
+document.getElementById('form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const categories = [];
+  if (document.getElementById('catSports').checked) {
+    categories.push('스포츠');
+  }
+  if (document.getElementById('catDrama').checked) {
+    categories.push('드라마');
+  }
+  const created = await fetch('/simulations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      concurrentUsers: Number(document.getElementById('concurrentUsers').value),
+      ageShares: {
+        '20대': Number(document.getElementById('age20').value),
+        '40대': Number(document.getElementById('age40').value)
+      },
+      categories
+    })
+  }).then(r => r.json());
+  simulationId = created.id;
+  const started = await fetch('/simulations/' + simulationId + '/start', { method: 'POST' })
+          .then(r => r.json());
+  document.getElementById('result').textContent = 'id=' + started.id + ' requestCount=' + started.requestCount;
+});
+
+document.getElementById('stop').addEventListener('click', async () => {
+  if (!simulationId) {
+    document.getElementById('result').textContent = 'start 전이면 요청 없음';
+    return;
+  }
+  const stopped = await fetch('/simulations/' + simulationId + '/stop', { method: 'POST' })
+          .then(r => r.json());
+  document.getElementById('result').textContent = 'status=' + stopped.status + ' requestCount=' + stopped.requestCount;
+});
+</script>
+</body>
+</html>

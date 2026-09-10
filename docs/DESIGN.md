@@ -95,21 +95,21 @@ Current Phase
 
 Phase 7 IN PROGRESS
 가상 사용자로 부하를 재현하는가
-코드: POST /simulations · start · stop. 메모리. User 1 · Content 1 순차 선택
-T7-03 측정: simulationsEndpoint=1 startRequestCount=2 stopBeforeStartRequestCount=0
-simulator.html / 연령·장르 분포 없음
+코드: POST /simulations · start · stop. simulator.html. ageShares·categories. 샘플 User 1/2 · Content 1/2
+T7-05 측정: simulatorHtml=1 indexLink=1 postsStartStop=1
+Impression 루프 / 30대 시드 없음
 ```
 
 현재 구조:
 
 ```text
-Browser (console / player / dashboard-ui)
+Browser (console / player / dashboard-ui / simulator)
   ↓
 Spring Boot
   ├─ Campaign / Creative CRUD
   ├─ Ad Selection (활성 / 기간 / 예산 잔여 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap·Budget)
   ├─ Impression / Click 접수 (JVM 큐) → 워커 INSERT  ← Dashboard 집계. 캡·예산 카운터가 아님
-  ├─ Simulations (메모리. start는 User 1 · Content 1 순차 GET /ads)
+  ├─ Simulations (메모리. start는 ageShares·categories로 샘플 User/Content 순차 GET /ads)
   └─ Dashboard 집계
   ↓
 PostgreSQL
@@ -143,13 +143,15 @@ T6-02: Phase 6 데모 완료 = 3초 폴링 누적. FR-13 초당·SSE는 미충�
 T7-01 측정: simulationsEndpoint=0 simulatorHtml=0 k6=0. Simulator 해법 없음 (해법 전).
 T7-02: 다음은 POST /simulations · start · stop (ADR 013 C). k6 / 스크립트 아님.
 T7-03 측정: simulationsEndpoint=1 startRequestCount=2 stopBeforeStartRequestCount=0. 화면·분포 없음.
+T7-04 측정: dramaOnlySpent=2 sportsWhenDramaOnly=0 splitSports=1 splitDrama=1. 화면·Impression 없음.
+T7-05 측정: simulatorHtml=1 indexLink=1 postsStartStop=1. Impression 루프 없음.
 
 아직 코드에 없는 것:
 
 ```text
 Redis
 Kafka
-simulator.html / 연령·장르 분포 / Impression 루프
+Impression 루프 / 30대 시드
 SSE / WebSocket
 Mock Ad Exchange
 ```
@@ -504,6 +506,8 @@ POST /simulations/{id}/start
 POST /simulations/{id}/stop
 
 T7-03: concurrentUsers. start는 샘플 User 1 · Content 1 순차 선택. 메모리. 화면 없음.
+T7-04: ageShares · categories. 20대→User 1, 40대→User 2. 스포츠→Content 1, 드라마→Content 2. 생략 시 T7-03.
+T7-05: GET /simulator.html. 폼이 create·start·stop 호출. Impression 없음.
 ```
 
 ---
@@ -815,6 +819,8 @@ T7-01 (해법 전): POST /simulations 없음. simulator.html 없음. k6 없음.
 simulationsEndpoint=0 simulatorHtml=0 k6=0.
 T7-02: 해법은 C. DESIGN 9.5 HTTP (ADR 013).
 T7-03: POST create/start/stop. startRequestCount=2. 분포 UI·Impression 루프 없음.
+T7-04: ageShares·categories. dramaOnlySpent=2 splitSports=1. 화면·Impression 없음.
+T7-05: simulatorHtml=1. Impression 루프 없음.
 
 가상의 사용자를 생성하여 광고 요청을 발생시킨다.
 

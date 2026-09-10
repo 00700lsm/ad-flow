@@ -19,9 +19,9 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T7-03 DONE
+현재 Task: T7-05 DONE
 Phase 7: IN PROGRESS
-T7-01 ~ T7-03: DONE
+T7-01 ~ T7-05: DONE
 다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```
 
@@ -37,7 +37,7 @@ Phase 7
 
 목표:
 
-다음은 DESIGN 9.5 POST /simulations · start · stop 이다 (ADR 013). FR-14 전체를 한 Task로 구현하지 않는다.
+simulator.html에서 사용자 수·20대/40대·스포츠/드라마로 POST /simulations를 호출한다 (ADR 013). FR-14 전체를 한 Task로 구현하지 않는다.
 
 Phase 6는 DONE이다 (ADR 012).
 
@@ -65,6 +65,33 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T7-05. Simulator 화면
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+GET /simulator.html 이 200이다
+index에 Simulator 링크가 있다
+화면에서 concurrentUsers·20대/40대·스포츠/드라마를 넣고
+POST /simulations 와 start / stop 을 호출한다
+Impression 루프 / 30대 시드 / k6 / Kafka는 포함하지 않는다
+```
+
+## T7-04. 연령·장르 분포로 광고 요청
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+POST /simulations 가 연령 비율·장르를 받는다
+start가 그 분포로 샘플 User/Content를 골라 GET /ads와 같은 선택을 한다
+비율·장르를 안 내면 T7-03과 같이 User 1 · Content 1
+simulator.html / Impression 루프 / k6 / Kafka는 포함하지 않는다
+```
 
 ## T7-03. POST /simulations 로 광고 요청
 
@@ -549,6 +576,8 @@ Phase 7:
 - [x] T7-01 Traffic Simulator 공백 재현
 - [x] T7-02 다음 방향 POST /simulations (ADR 013)
 - [x] T7-03 POST /simulations 로 광고 요청
+- [x] T7-04 연령·장르 분포로 광고 요청
+- [x] T7-05 Simulator 화면
 - [ ] FR-14 Traffic Simulator
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
