@@ -18,14 +18,16 @@ public class Simulation {
     private final int concurrentUsers;
     private final Map<String, Integer> ageShares;
     private final List<String> categories;
+    private final int clickRate;
     private Status status = Status.CREATED;
     private int requestCount;
 
-    public Simulation(long id, int concurrentUsers, Map<String, Integer> ageShares, List<String> categories) {
+    public Simulation(long id, int concurrentUsers, Map<String, Integer> ageShares, List<String> categories, int clickRate) {
         this.id = id;
         this.concurrentUsers = concurrentUsers;
         this.ageShares = Collections.unmodifiableMap(new LinkedHashMap<>(ageShares));
         this.categories = Collections.unmodifiableList(new ArrayList<>(categories));
+        this.clickRate = clickRate;
     }
 
     public long getId() {
@@ -42,6 +44,10 @@ public class Simulation {
 
     public List<String> getCategories() {
         return categories;
+    }
+
+    public int getClickRate() {
+        return clickRate;
     }
 
     public synchronized Status getStatus() {

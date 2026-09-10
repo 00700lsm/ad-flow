@@ -25,7 +25,7 @@ public class SimulationController {
     @ResponseStatus(HttpStatus.CREATED)
     public SimulationResponse create(@RequestBody CreateRequest request) {
         return SimulationResponse.from(
-                simulations.create(request.concurrentUsers(), request.ageShares(), request.categories())
+                simulations.create(request.concurrentUsers(), request.ageShares(), request.categories(), request.clickRate())
         );
     }
 
@@ -39,7 +39,7 @@ public class SimulationController {
         return SimulationResponse.from(simulations.stop(id));
     }
 
-    public record CreateRequest(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories) {
+    public record CreateRequest(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories, Integer clickRate) {
     }
 
     public record SimulationResponse(
@@ -47,6 +47,7 @@ public class SimulationController {
             int concurrentUsers,
             Map<String, Integer> ageShares,
             List<String> categories,
+            int clickRate,
             int requestCount,
             String status
     ) {
@@ -56,6 +57,7 @@ public class SimulationController {
                     simulation.getConcurrentUsers(),
                     simulation.getAgeShares(),
                     simulation.getCategories(),
+                    simulation.getClickRate(),
                     simulation.getRequestCount(),
                     simulation.getStatus().name()
             );

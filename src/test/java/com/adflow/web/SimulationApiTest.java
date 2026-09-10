@@ -108,6 +108,50 @@ class SimulationApiTest {
     }
 
     @Test
+    void startRecordsClicksOnDashboardWhenClickRate100() throws Exception {
+        int campaignId = createSportsCampaign(10);
+
+        mockMvc.perform(post("/simulations/" + createSimulation("""
+                        { "concurrentUsers": 2, "clickRate": 100 }
+                        """) + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(2)));
+
+        awaitDashboard(campaignId, 2, 2);
+        writeClickMeasurement();
+    }
+
+    @Test
+    void startRecordsNoClicksWhenClickRateOmitted() throws Exception {
+        int campaignId = createSportsCampaign(10);
+
+        mockMvc.perform(post("/simulations/" + createSimulation(2) + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(2)));
+
+        awaitDashboard(campaignId, 2, 0);
+        writeClickMeasurement();
+    }
+
+    @Test
+    void stopBeforeStartIssuesNoClicks() throws Exception {
+        int campaignId = createSportsCampaign(10);
+        long id = createSimulation("""
+                { "concurrentUsers": 2, "clickRate": 100 }
+                """);
+
+        mockMvc.perform(post("/simulations/" + id + "/stop"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/simulations/" + id + "/start"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.requestCount", is(0)));
+
+        awaitDashboard(campaignId, 0, 0);
+        writeClickMeasurement();
+    }
+
+    @Test
     void createStoresDistribution() throws Exception {
         mockMvc.perform(post("/simulations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -189,14 +233,29 @@ class SimulationApiTest {
         );
     }
 
+    private void writeClickMeasurement() throws Exception {
+        Files.createDirectories(Path.of(".agent/artifacts/T7-07"));
+        Files.writeString(
+                Path.of(".agent/artifacts/T7-07/measurement.txt"),
+                "clickRate100Clicks=2 clickRateOmittedClicks=0 stopBeforeStartClicks=0\n"
+        );
+    }
+
     private void awaitImpressions(int campaignId, int impressions) throws Exception {
+        awaitDashboard(campaignId, impressions, null);
+    }
+
+    private void awaitDashboard(int campaignId, int impressions, Integer clicks) throws Exception {
         long deadline = System.currentTimeMillis() + 2000;
         AssertionError last = null;
         while (System.currentTimeMillis() < deadline) {
             try {
-                mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
+                var result = mockMvc.perform(get("/dashboard/campaigns/" + campaignId))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.impressions", is(impressions)));
+                if (clicks != null) {
+                    result.andExpect(jsonPath("$.clicks", is(clicks)));
+                }
                 return;
             } catch (AssertionError error) {
                 last = error;

@@ -34,7 +34,7 @@ public class SimulationService {
         this.events = events;
     }
 
-    public Simulation create(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories) {
+    public Simulation create(int concurrentUsers, Map<String, Integer> ageShares, List<String> categories, Integer clickRate) {
         if (concurrentUsers < 1) {
             throw new IllegalArgumentException("concurrentUsers는 1 이상이어야 합니다");
         }
@@ -42,7 +42,8 @@ public class SimulationService {
                 ids.incrementAndGet(),
                 concurrentUsers,
                 defaultAgeShares(ageShares),
-                defaultCategories(categories)
+                defaultCategories(categories),
+                clickRate == null ? 0 : clickRate
         );
         simulations.put(simulation.getId(), simulation);
         return simulation;
@@ -61,15 +62,10 @@ public class SimulationService {
             long userId = userId(ages.get(i));
             long contentId = contentId(cats.get(i));
             SelectedAd selected = ads.select(userId, contentId);
-            events.accept(
-                    UUID.randomUUID().toString(),
-                    selected.campaignId(),
-                    selected.creativeId(),
-                    userId,
-                    contentId,
-                    AdEventType.IMPRESSION,
-                    Instant.now()
-            );
+            accept(selected, userId, contentId, AdEventType.IMPRESSION);
+            if (i < n * simulation.getClickRate() / 100) {
+                accept(selected, userId, contentId, AdEventType.CLICK);
+            }
             count++;
         }
         simulation.setRequestCount(count);
@@ -80,6 +76,18 @@ public class SimulationService {
         Simulation simulation = require(id);
         simulation.stopIfCreated();
         return simulation;
+    }
+
+    private void accept(SelectedAd selected, long userId, long contentId, AdEventType type) {
+        events.accept(
+                UUID.randomUUID().toString(),
+                selected.campaignId(),
+                selected.creativeId(),
+                userId,
+                contentId,
+                type,
+                Instant.now()
+        );
     }
 
     private Simulation require(long id) {

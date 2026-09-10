@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T7-07 Plan HITL
+현재 Task: T7-07 DONE
 Phase 7: IN PROGRESS
-T7-01 ~ T7-06: DONE
-다음: T7-07 승인 후 Red
+T7-01 ~ T7-07: DONE
+다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -37,7 +37,7 @@ Phase 7
 
 목표:
 
-start가 Impression 뒤에 일부 Click을 남긴다. 30대 시드는 이 Phase에서 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
+start가 clickRate만큼 Click을 남긴다. 30대 시드는 이 Phase에서 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
 
 Phase 6는 DONE이다 (ADR 012).
 
@@ -68,7 +68,7 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 ## T7-07. start 후 Click
 
-상태: `TODO`
+상태: `DONE`
 
 완료 조건:
 
@@ -607,6 +607,7 @@ Phase 7:
 - [x] T7-04 연령·장르 분포로 광고 요청
 - [x] T7-05 Simulator 화면
 - [x] T7-06 start 후 Impression
+- [x] T7-07 start 후 Click
 - [ ] FR-14 Traffic Simulator
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
