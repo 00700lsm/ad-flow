@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T7-06 DONE
+현재 Task: T7-07 Plan HITL
 Phase 7: IN PROGRESS
 T7-01 ~ T7-06: DONE
-다음: Phase 7 다음 Task는 개발자가 요청할 때
+다음: T7-07 승인 후 Red
 ```
 
 ---
@@ -37,7 +37,7 @@ Phase 7
 
 목표:
 
-start가 선택마다 Impression을 남긴다. Click 확률은 이 Phase에서 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
+start가 Impression 뒤에 일부 Click을 남긴다. 30대 시드는 이 Phase에서 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
 
 Phase 6는 DONE이다 (ADR 012).
 
@@ -65,6 +65,21 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T7-07. start 후 Click
+
+상태: `TODO`
+
+완료 조건:
+
+```text
+POST /simulations 가 clickRate를 받는다
+start가 Impression 뒤에 그 비율만큼 Click을 남긴다
+Dashboard 클릭이 그 횟수만큼 오른다
+clickRate를 안 내면 Click은 0이다
+stop 후 start면 Click을 안 낸다
+30대 시드 / k6 / Kafka는 포함하지 않는다
+```
 
 ## T7-06. start 후 Impression
 
