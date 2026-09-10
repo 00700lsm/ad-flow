@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T6-02 DONE
-Phase 6: DONE
-T6-01 ~ T6-02: DONE
-다음: Phase 7는 개발자가 요청할 때
+현재 Task: T7-03 DONE
+Phase 7: IN PROGRESS
+T7-01 ~ T7-03: DONE
+다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -30,16 +30,16 @@ T6-01 ~ T6-02: DONE
 # 1. 현재 Phase
 
 ```text
-Phase 6
-운영자가 이벤트를 보는가
-상태: DONE
+Phase 7
+가상 사용자로 부하를 재현하는가
+상태: IN PROGRESS
 ```
 
 목표:
 
-Dashboard에 초당 지표·실시간 푸시가 있는지 먼저 재현한다. SSE / 초당 필드는 측정 후 Human Gate에서 고른다.
+다음은 DESIGN 9.5 POST /simulations · start · stop 이다 (ADR 013). FR-14 전체를 한 Task로 구현하지 않는다.
 
-Phase 6 데모 완료는 3초 폴링 누적이다 (ADR 011·012). FR-13 초당·SSE는 미충족. Phase 7 Task는 이 문서에 미리 넣지 않는다.
+Phase 6는 DONE이다 (ADR 012).
 
 ---
 
@@ -48,12 +48,13 @@ Phase 6 데모 완료는 3초 폴링 누적이다 (ADR 011·012). FR-13 초당·
 ```text
 Kafka / Redis / Consumer 재처리
 k6 / Prometheus / Grafana
-Traffic Simulator API
 Human Gate 전 SSE / WebSocket / 초당 지표
 Mock Ad Exchange
 Kubernetes / AWS
 운영 AI
 Frequency Cap / Budget / UNIQUE 계약 변경
+Experiment RPS
+FR-14 전체 (분배 화면까지) 한 Task
 ```
 
 ROADMAP에 있다는 이유만으로 구현하지 않는다.
@@ -64,6 +65,45 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T7-03. POST /simulations 로 광고 요청
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+POST /simulations 로 concurrentUsers를 받는다
+POST /simulations/{id}/start 가 그 횟수만큼 GET /ads 와 같은 선택을 한다
+POST /simulations/{id}/stop 이 start 전이면 요청을 안 낸다
+k6 / 분포 UI / Kafka는 포함하지 않는다
+```
+
+## T7-02. Phase 7 다음 방향 고정
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+FR-14 중 재현(T7-01 Simulator 없음)과 다음 방향(후보 C)을 문서로 고정한다
+Phase 7를 닫지 않는다
+POST /simulations 구현 / k6 / Kafka는 포함하지 않는다
+```
+
+## T7-01. Traffic Simulator 공백 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+POST /simulations 가 없다
+시뮬레이터 화면이 없다
+공백을 테스트로 재현하고 남긴다
+Simulator 구현 / k6 / Kafka는 포함하지 않는다
+Human Gate 전에 가상 트래픽을 넣지 않는다
+```
 
 ## T6-02. Phase 6 데모 범위 고정
 
@@ -503,5 +543,12 @@ Phase 6:
 - [x] T6-01 Dashboard 초당 지표·실시간 푸시 공백 재현
 - [x] T6-02 Phase 6 데모 범위 고정 (ADR 012)
 - [ ] FR-13 실시간 Dashboard (ADR 011·012, Phase 6에서 미충족)
+
+Phase 7:
+
+- [x] T7-01 Traffic Simulator 공백 재현
+- [x] T7-02 다음 방향 POST /simulations (ADR 013)
+- [x] T7-03 POST /simulations 로 광고 요청
+- [ ] FR-14 Traffic Simulator
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

@@ -193,11 +193,17 @@ T6-01 측정: pollMs=3000 sse=0. 해법 A. 3초 폴링 감수 (ADR 011).
 
 ## Phase 7. 가상 사용자로 부하를 재현하는가
 
+상태: `IN PROGRESS`
+
 질문:
 
 Simulator로 분배·예산·캡·대시보드 변화를 제품 화면에서 볼 수 있는가?
 
 완료 조건: FR-14.
+
+T7-01 측정: simulationsEndpoint=0 simulatorHtml=0 k6=0. FR-14 미충족.
+T7-02: 다음은 POST /simulations · start · stop (ADR 013).
+T7-03: startRequestCount=2. 화면·분포 없음. FR-14 미충족.
 
 성능 숫자(RPS 단계)는 이 Phase 이후 Experiment로 분리한다.
 
@@ -234,9 +240,10 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 6 DONE
-상태: DONE
-T6-01: DONE (초당 지표·SSE 없음. 후보 A, ADR 011)
-T6-02: DONE (Phase 6 닫기, ADR 012)
-다음: Phase 7는 개발자가 요청할 때
+Current Phase: Phase 7
+상태: IN PROGRESS
+T7-01: DONE (해법 전 simulationsEndpoint=0)
+T7-02: DONE (다음 HTTP Simulator, ADR 013 C)
+T7-03: DONE (startRequestCount=2. 화면·분포 없음)
+다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```

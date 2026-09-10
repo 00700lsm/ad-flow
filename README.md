@@ -29,17 +29,17 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 6 DONE
-운영자가 이벤트를 보는가
-T6-01 Dashboard 3초 폴링. 초당 지표·SSE 없음
-T6-02 데모 범위 고정 (ADR 012)
+Phase 7
+가상 사용자로 부하를 재현하는가
+T7-01 공백 재현. T7-02 제품 HTTP (ADR 013)
+T7-03 POST /simulations start/stop. User 1 순차 선택. 화면 없음
 Redis / Kafka 없음
 ```
 
 Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click / 사용 예산 / 상태를 확인할 수 있다.
 
 `GET /ads`가 후보를 고를 때 당일 캡 카운터와 예산을 원자적으로 올린다. 한도·예산에 걸린 캠페인은 다음 후보가 있으면 그 광고를 고른다. Impression은 Dashboard 집계용이며 캡·예산 카운터가 아니다.
-동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Kafka, Simulator는 없다.
+동시 GET 한도는 테스트로 고정했다. Redis는 쓰지 않는다. Kafka는 없다. Simulator는 POST /simulations(순차 선택)만 있고 화면은 없다.
 
 ---
 

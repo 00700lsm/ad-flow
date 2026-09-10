@@ -93,10 +93,11 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 6 DONE (ADR 012)
-운영자가 이벤트를 보는가
-코드: Dashboard 누적 집계. 3초 폴링. SSE / 초당 지표 없음
-다음: Phase 7는 개발자가 요청할 때
+Phase 7 IN PROGRESS
+가상 사용자로 부하를 재현하는가
+코드: POST /simulations · start · stop. 메모리. User 1 · Content 1 순차 선택
+T7-03 측정: simulationsEndpoint=1 startRequestCount=2 stopBeforeStartRequestCount=0
+simulator.html / 연령·장르 분포 없음
 ```
 
 현재 구조:
@@ -108,6 +109,7 @@ Spring Boot
   ├─ Campaign / Creative CRUD
   ├─ Ad Selection (활성 / 기간 / 예산 잔여 / 연령 / 장르 / Priority / 선택 시점 Frequency Cap·Budget)
   ├─ Impression / Click 접수 (JVM 큐) → 워커 INSERT  ← Dashboard 집계. 캡·예산 카운터가 아님
+  ├─ Simulations (메모리. start는 User 1 · Content 1 순차 GET /ads)
   └─ Dashboard 집계
   ↓
 PostgreSQL
@@ -138,13 +140,16 @@ T5-05: README curl 3회 201, GET dashboard impressions=1. Player는 새 eventId.
 T5-06: Phase 5 데모 완료 = UNIQUE 집계. SSE / Kafka 멱등 Consumer는 없음 (ADR 010).
 T6-01 측정: pollMs=3000 sse=0 impressionsPerSecField=0. 실시간 해법 없음 (ADR 011 A).
 T6-02: Phase 6 데모 완료 = 3초 폴링 누적. FR-13 초당·SSE는 미충족 (ADR 012).
+T7-01 측정: simulationsEndpoint=0 simulatorHtml=0 k6=0. Simulator 해법 없음 (해법 전).
+T7-02: 다음은 POST /simulations · start · stop (ADR 013 C). k6 / 스크립트 아님.
+T7-03 측정: simulationsEndpoint=1 startRequestCount=2 stopBeforeStartRequestCount=0. 화면·분포 없음.
 
 아직 코드에 없는 것:
 
 ```text
 Redis
 Kafka
-Traffic Simulator
+simulator.html / 연령·장르 분포 / Impression 루프
 SSE / WebSocket
 Mock Ad Exchange
 ```
@@ -497,6 +502,8 @@ GET /dashboard/summary
 POST /simulations
 POST /simulations/{id}/start
 POST /simulations/{id}/stop
+
+T7-03: concurrentUsers. start는 샘플 User 1 · Content 1 순차 선택. 메모리. 화면 없음.
 ```
 
 ---
@@ -803,6 +810,11 @@ Error Rate
 목표는 시스템 내부에서 처리되는 이벤트를 사용자가 직접 볼 수 있게 만드는 것이다.
 
 ## 12.7 Phase 7. Traffic Simulator
+
+T7-01 (해법 전): POST /simulations 없음. simulator.html 없음. k6 없음.
+simulationsEndpoint=0 simulatorHtml=0 k6=0.
+T7-02: 해법은 C. DESIGN 9.5 HTTP (ADR 013).
+T7-03: POST create/start/stop. startRequestCount=2. 분포 UI·Impression 루프 없음.
 
 가상의 사용자를 생성하여 광고 요청을 발생시킨다.
 
