@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T4-06 DONE
-Phase 4: DONE
-T4-01 ~ T4-06: DONE
-다음: Phase 5는 개발자가 요청할 때
+현재 Task: T5-01 DONE
+Phase 5: IN PROGRESS
+T5-01: DONE
+다음: Phase 5 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -30,18 +30,16 @@ T4-01 ~ T4-06: DONE
 # 1. 현재 Phase
 
 ```text
-Phase 4
-서빙과 이벤트 처리 결합
-상태: DONE
+Phase 5
+중복 이벤트와 정산
+상태: IN PROGRESS
 ```
 
 목표:
 
-이벤트 적재가 느려도 광고 선택 API가 같이 멈추지 않는지 먼저 재현한다. 분리 기술은 측정 후 Human Gate에서 고른다.
+같은 eventId가 여러 번 오면 집계가 여러 번 오르는지 먼저 재현한다. 멱등 기술은 측정 후 Human Gate에서 고른다.
 
-데모 완료는 접수 분리(T4-02)다. 재처리·풀 분리는 한계로 남긴다 (ADR 006·007).
-
-Phase 5 Task는 이 문서를 열 때 적는다. FR-12 전체를 한 Task로 구현하지 않는다.
+Phase 4는 DONE이다. FR-12 전체를 한 Task로 구현하지 않는다.
 
 ---
 
@@ -56,7 +54,7 @@ Mock Ad Exchange
 Kubernetes / AWS
 운영 AI
 Frequency Cap / Budget 계약 변경
-FR-12 멱등
+Human Gate 전 UNIQUE / 멱등 해법
 ```
 
 ROADMAP에 있다는 이유만으로 구현하지 않는다.
@@ -67,6 +65,19 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T5-01. 동일 eventId 중복 집계 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+같은 eventId로 POST /events/impression 이 세 번 오면 Dashboard 노출이 3일 수 있다
+입력 3 / 유효 키 1 / 집계 +3 을 테스트로 재현하고 남긴다
+unique / upsert / Kafka 멱등은 포함하지 않는다
+Human Gate 전에 한 번만 집계되도록 고치지 않는다
+```
 
 ## T4-06. Phase 4 데모 범위 고정
 
@@ -389,5 +400,10 @@ Phase 4:
 - [x] T4-06 Phase 4 데모 범위 고정 (ADR 007)
 - [x] FR-11 접수 분리 (데모, T4-02)
 - [ ] FR-11 Consumer 재처리 / Kafka (ADR 006, Phase 4에서 미충족)
+
+Phase 5:
+
+- [x] T5-01 동일 eventId 중복 집계 재현
+- [ ] FR-12 멱등 (입력 3 / 유효 1 / 집계 +1, 데모 A, ADR 008)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

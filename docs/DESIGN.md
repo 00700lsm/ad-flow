@@ -93,10 +93,9 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 4 DONE (데모)
-서빙과 이벤트 처리 결합
-코드: T4-02 이벤트 API는 큐 접수 후 201. INSERT는 JVM 워커. Kafka 없음
-데모 범위: 접수 분리. 재처리·풀 분리는 한계 (ADR 006·007)
+Phase 5
+중복 이벤트와 정산
+코드: 워커 INSERT. eventId unique 없음. Kafka 없음
 ```
 
 현재 구조:
@@ -130,6 +129,7 @@ T4-02 측정: persistDelayMs=400 postMs=2. 프로세스 유실·워커와 GET의
 T4-03 측정: accepted=1 persistedImmediately=0 persistedAfterWait=1. 내구성 해법 없음.
 T4-04 측정: workerHoldMs=400 getAdsWaitMs=431 postMs=3 pool=1. 풀 분리 없음 (ADR 007 A).
 T4-05 측정: accepted=1 afterCrashPersisted=0 replayed=0 persistDelayMs=400. 재처리 없음.
+T5-01 측정: posted=3 uniqueEventIds=1 aggregated=3. 멱등 없음 (ADR 008 A).
 
 아직 코드에 없는 것:
 
@@ -740,7 +740,18 @@ Consumer 장애 대응
 
 ## 12.5 Phase 5. 이벤트 중복과 정합성
 
-Kafka 재처리에서 같은 Impression이 여러 번 처리되면 정산 데이터가 틀어진다.
+Kafka 재처리에서 같은 Impression이 여러 번 처리되면 정산 데이터가 틀어진다. **현재 코드는 unique 없는 INSERT**다. Kafka 멱등 Consumer 없음.
+
+T5-01: 같은 eventId Impression 3 POST → Dashboard 노출 3. posted=3 uniqueEventIds=1 aggregated=3.
+데모에서는 그 중복 집계를 감수한다 (ADR 008). UNIQUE / Kafka 멱등 없음.
+
+현재 코드:
+
+```text
+POST /events/*  같은 eventId도 매번 큐에 넣음
+워커            매번 INSERT
+Dashboard       COUNT(행)
+```
 
 ```text
 At-least-once Delivery
@@ -757,6 +768,8 @@ eventId 기반 Deduplication
 최종 집계 데이터 확인
 정산 데이터와 실시간 데이터 비교
 ```
+
+목표 구조이지 T5-01 해법이 아니다.
 
 ## 12.6 Phase 6. 실시간 Dashboard
 

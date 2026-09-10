@@ -158,6 +158,8 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 
 ## Phase 5. 중복 이벤트와 정산
 
+상태: `IN PROGRESS`
+
 질문:
 
 같은 `eventId`가 세 번 들어오면 집계가 세 번 오르는가?
@@ -223,15 +225,8 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 4
-상태: DONE
-T4-01: DONE (Serving·Event 커넥션 결합 재현)
-T4-02: DONE (JVM 큐 접수, ADR 005)
-T4-03: DONE (접수 직후 집계 공백 재현)
-T4-04: DONE (워커·GET 풀 공유 재현, Human Gate A)
-T4-05: DONE (워커 장애 후 재처리 불가 재현, Human Gate A = ADR 006 유지)
-T4-06: DONE (데모 범위 고정, ADR 007)
-유실: A 선택 (데모 감수, ADR 006)
-풀: A 선택 (같은 DataSource, ADR 007)
-다음: Phase 5는 개발자가 요청할 때
+Current Phase: Phase 5
+상태: IN PROGRESS
+T5-01: DONE (동일 eventId 중복 집계 재현, Human Gate A = ADR 008)
+다음: Phase 5 다음 Task는 개발자가 요청할 때
 ```
