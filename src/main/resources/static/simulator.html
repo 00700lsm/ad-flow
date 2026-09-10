@@ -19,16 +19,22 @@
     <form id="form">
       <label>동시 사용자</label>
       <input id="concurrentUsers" name="concurrentUsers" type="number" min="1" value="2" required>
-      <div class="row">
+      <div class="row row-3">
         <div>
           <label>20대 %</label>
           <input id="age20" name="age20" type="number" min="0" max="100" value="50" required>
+        </div>
+        <div>
+          <label>30대 %</label>
+          <input id="age30" name="age30" type="number" min="0" max="100" value="0" required>
         </div>
         <div>
           <label>40대 %</label>
           <input id="age40" name="age40" type="number" min="0" max="100" value="50" required>
         </div>
       </div>
+      <label>Click %</label>
+      <input id="clickRate" name="clickRate" type="number" min="0" max="100" value="0" required>
       <label>콘텐츠</label>
       <label><input id="catSports" type="checkbox" checked> 스포츠</label>
       <label><input id="catDrama" type="checkbox" checked> 드라마</label>
@@ -57,8 +63,10 @@ document.getElementById('form').addEventListener('submit', async (event) => {
       concurrentUsers: Number(document.getElementById('concurrentUsers').value),
       ageShares: {
         '20대': Number(document.getElementById('age20').value),
+        '30대': Number(document.getElementById('age30').value),
         '40대': Number(document.getElementById('age40').value)
       },
+      clickRate: Number(document.getElementById('clickRate').value),
       categories
     })
   }).then(r => r.json());

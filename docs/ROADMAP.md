@@ -209,6 +209,7 @@ T7-05: simulatorHtml=1. Impression 루프 없음. FR-14 미충족.
 T7-06: startImpressions=2. Click 없음. FR-14 미충족.
 T7-07: clickRate100Clicks=2. 30대 시드 없음. FR-14 미충족.
 T7-08: thirtiesSpent=2. 폼 30대 없음. FR-14 미충족.
+T7-09: thirtiesShare=1 clickRate=1. FR-14 미충족.
 
 성능 숫자(RPS 단계)는 이 Phase 이후 Experiment로 분리한다.
 
@@ -255,5 +256,6 @@ T7-05: DONE (simulatorHtml=1. Impression 루프 없음)
 T7-06: DONE (startImpressions=2. Click 없음)
 T7-07: DONE (clickRate100Clicks=2. 30대 시드 없음)
 T7-08: DONE (thirtiesSpent=2. 폼 30대 없음)
+T7-09: DONE (thirtiesShare=1 clickRate=1)
 다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```

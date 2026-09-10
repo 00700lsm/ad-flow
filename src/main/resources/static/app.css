@@ -43,6 +43,7 @@ input, select {
 }
 input[type=checkbox] { width: auto; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row-3 { grid-template-columns: 1fr 1fr 1fr; }
 button {
   margin-top: 14px;
   background: var(--accent);

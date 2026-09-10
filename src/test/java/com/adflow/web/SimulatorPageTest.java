@@ -61,11 +61,33 @@ class SimulatorPageTest {
         writeMeasurement();
     }
 
+    @Test
+    void pagePostsThirtiesShareAndClickRate() throws Exception {
+        String html = mockMvc.perform(get("/simulator.html"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(html).contains("30대");
+        assertThat(html).contains("clickRate");
+        assertThat(html).contains("'30대'");
+        writeFormMeasurement();
+    }
+
     private void writeMeasurement() throws Exception {
         Files.createDirectories(Path.of(".agent/artifacts/T7-05"));
         Files.writeString(
                 Path.of(".agent/artifacts/T7-05/measurement.txt"),
                 "simulatorHtml=1 indexLink=1 postsStartStop=1\n"
+        );
+    }
+
+    private void writeFormMeasurement() throws Exception {
+        Files.createDirectories(Path.of(".agent/artifacts/T7-09"));
+        Files.writeString(
+                Path.of(".agent/artifacts/T7-09/measurement.txt"),
+                "thirtiesShare=1 clickRate=1\n"
         );
     }
 }
