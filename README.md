@@ -32,7 +32,7 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 Phase 7
 가상 사용자로 부하를 재현하는가
 T7-01 공백 재현. T7-02 제품 HTTP (ADR 013)
-T7-03 POST /simulations start/stop. T7-04 연령·장르 분포. T7-05 simulator.html. T7-06 Impression. T7-07 clickRate Click. T7-08 User 3(30대). T7-09 폼 30대·clickRate
+T7-03 POST /simulations start/stop. T7-04 연령·장르 분포. T7-05 simulator.html. T7-06 Impression. T7-07 clickRate Click. T7-08 User 3(30대). T7-09 폼 30대·clickRate. T7-10 Dashboard 시연
 Redis / Kafka 없음
 ```
 
@@ -67,6 +67,7 @@ http://localhost:8080/              시작
 http://localhost:8080/console.html  캠페인 생성
 http://localhost:8080/player.html   광고 재생
 http://localhost:8080/dashboard.html 성과
+http://localhost:8080/simulator.html 가상 요청
 ```
 
 광고 영상은 업로드 첨부파일이 아니다. 저장소 `src/main/resources/static/ads/videos/`에 파일을 두고, 캠페인 소재 URL에 그 경로를 적으면 Spring이 정적 리소스로 내려준다.
@@ -111,6 +112,10 @@ curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8080/events/im
 ```
 
 `/dashboard.html`에서 해당 캠페인 노출은 1이다. HTTP 201은 큐 접수이며 INSERT 완료가 아니다.
+
+Simulator로 Dashboard 변화를 보려면 Console에서 스포츠 캠페인 하나를 만든다 (20–39세, cap=0, 예산 여유). `/simulator.html`에서 동시 사용자 2, Click % 100, 스포츠만 켜고 Simulation을 누른다. start는 그 횟수만큼 한 번 순차 요청이다. 연속 부하·k6가 아니다.
+
+`/dashboard.html`에서 그 캠페인 노출·클릭·사용 예산이 오른다. Click %를 0으로 두면 노출만 오른다.
 
 ---
 

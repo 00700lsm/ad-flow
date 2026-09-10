@@ -75,6 +75,21 @@ class SimulatorPageTest {
         writeFormMeasurement();
     }
 
+    @Test
+    void indexMentionsSimulatorThenDashboard() throws Exception {
+        String html = mockMvc.perform(get("/index.html"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        int simulator = html.indexOf("simulator.html");
+        int dashboardAfter = html.indexOf("노출", html.indexOf("Simulator"));
+        assertThat(simulator).isGreaterThan(0);
+        assertThat(dashboardAfter).isGreaterThan(simulator);
+        writeDemoMeasurement();
+    }
+
     private void writeMeasurement() throws Exception {
         Files.createDirectories(Path.of(".agent/artifacts/T7-05"));
         Files.writeString(
@@ -88,6 +103,14 @@ class SimulatorPageTest {
         Files.writeString(
                 Path.of(".agent/artifacts/T7-09/measurement.txt"),
                 "thirtiesShare=1 clickRate=1\n"
+        );
+    }
+
+    private void writeDemoMeasurement() throws Exception {
+        Files.createDirectories(Path.of(".agent/artifacts/T7-10"));
+        Files.writeString(
+                Path.of(".agent/artifacts/T7-10/measurement.txt"),
+                "indexSimulatorThenDashboard=1\n"
         );
     }
 }

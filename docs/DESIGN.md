@@ -95,8 +95,8 @@ Current Phase
 
 Phase 7 IN PROGRESS
 가상 사용자로 부하를 재현하는가
-코드: POST /simulations · start · stop. simulator.html에 30대·clickRate
-T7-09 측정: thirtiesShare=1 clickRate=1
+코드: POST /simulations · start · stop. simulator.html. README 시연 경로
+T7-10 관찰: impressions=2 clicks=2 spentBudget=2
 ```
 
 현재 구조:
@@ -148,6 +148,7 @@ T7-06 측정: startImpressions=2 stopBeforeStartImpressions=0. Click 없음.
 T7-07 측정: clickRate100Clicks=2 clickRateOmittedClicks=0 stopBeforeStartClicks=0. 30대 시드 없음.
 T7-08 측정: thirtiesSpent=2 twentiesWhenThirtiesOnly=0. 폼 30대 없음.
 T7-09 측정: thirtiesShare=1 clickRate=1.
+T7-10 관찰: impressions=2 clicks=2 spentBudget=2. Phase 닫기 없음.
 
 아직 코드에 없는 것:
 
@@ -514,6 +515,7 @@ T7-06: start가 선택마다 Impression. Click 없음.
 T7-07: clickRate. 100이면 clicks=2. 생략이면 0. 30대 시드 없음.
 T7-08: 30대→User 3(35). thirtiesSpent=2. 폼 없음.
 T7-09: simulator.html 30대 % · clickRate. thirtiesShare=1.
+T7-10: README simulator → Dashboard. impressions=2 clicks=2.
 ```
 
 ---
@@ -831,6 +833,7 @@ T7-06: startImpressions=2. Click 없음.
 T7-07: clickRate100Clicks=2. 30대 시드 없음.
 T7-08: thirtiesSpent=2. 폼 30대 없음.
 T7-09: thirtiesShare=1 clickRate=1.
+T7-10: impressions=2 clicks=2 spentBudget=2.
 
 가상의 사용자를 생성하여 광고 요청을 발생시킨다.
 

@@ -19,9 +19,9 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T7-09 DONE
+현재 Task: T7-10 DONE
 Phase 7: IN PROGRESS
-T7-01 ~ T7-09: DONE
+T7-01 ~ T7-10: DONE
 다음: Phase 7 다음 Task는 개발자가 요청할 때
 ```
 
@@ -37,7 +37,7 @@ Phase 7
 
 목표:
 
-시뮬레이터 폼에 30대와 clickRate가 있다. FR-14 전체를 한 Task로 구현하지 않는다.
+Simulator 시연 경로가 README에 있다. Phase 7 닫기는 이 Phase에서 다음 Task다. FR-14 전체를 한 Task로 구현하지 않는다.
 
 Phase 6는 DONE이다 (ADR 012).
 
@@ -65,6 +65,18 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T7-10. Simulator로 Dashboard 변화 시연
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+README에 simulator.html → start → Dashboard 경로가 있다
+시연 후 노출·클릭 또는 spentBudget이 오른 관찰을 artifacts/T7-10에 남긴다
+k6 / Kafka / 연속 루프 / Phase 닫기는 포함하지 않는다
+```
 
 ## T7-09. Simulator 폼 30대·clickRate
 
@@ -636,6 +648,7 @@ Phase 7:
 - [x] T7-07 start 후 Click
 - [x] T7-08 30대 샘플 User
 - [x] T7-09 Simulator 폼 30대·clickRate
+- [x] T7-10 Simulator로 Dashboard 변화 시연
 - [ ] FR-14 Traffic Simulator
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
