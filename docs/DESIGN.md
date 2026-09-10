@@ -93,9 +93,10 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 5
+Phase 5 DONE (ADR 010)
 중복 이벤트와 정산
 코드: 워커 INSERT. eventId UNIQUE. 충돌은 건너뜀. Kafka 없음
+다음: Phase 6는 개발자가 요청할 때
 ```
 
 현재 구조:
@@ -134,6 +135,7 @@ T4-05 측정: accepted=1 afterCrashPersisted=0 replayed=0 persistDelayMs=400. �
 T5-01 측정: posted=3 uniqueEventIds=1 aggregated=3. 멱등 없음 (해법 전).
 T5-03 측정: posted=3 uniqueEventIds=1 aggregated=1 (ADR 009).
 T5-05: README curl 3회 201, GET dashboard impressions=1. Player는 새 eventId.
+T5-06: Phase 5 데모 완료 = UNIQUE 집계. SSE / Kafka 멱등 Consumer는 없음 (ADR 010).
 
 아직 코드에 없는 것:
 
@@ -748,6 +750,8 @@ Kafka 재처리에서 같은 Impression이 여러 번 처리되면 정산 데이
 
 T5-01 (해법 전): 같은 eventId 3 POST → 노출 3. posted=3 aggregated=3.
 T5-03 (ADR 009): 같은 3 POST → 노출 1. posted=3 uniqueEventIds=1 aggregated=1.
+T5-05: README curl 3회, Dashboard 노출 1.
+T5-06: Phase 5 데모 완료 = UNIQUE 집계. FR-12는 T5-03 + T5-05 (ADR 010). SSE 없음.
 
 현재 코드:
 

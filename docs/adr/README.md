@@ -38,6 +38,7 @@ Budget / Frequency Cap 동시성 제어 방식
 Phase 4 데모 완료 범위 → `007-phase4-demo-accept-split-only.md`
 데모에서 eventId 중복 집계를 감수할지 → `008-accept-duplicate-event-id-aggregation.md` (ADR 009로 대체)
 같은 eventId 집계 UNIQUE → `009-event-id-unique-aggregation.md`
+Phase 5 데모 완료 범위 → `010-phase5-demo-event-id-unique.md`
 Source of Truth와 Realtime Counter를 나눌지
 프로젝트 Scope 변경
 Phase 완료 조건을 바꿀지

@@ -158,7 +158,7 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 
 ## Phase 5. 중복 이벤트와 정산
 
-상태: `IN PROGRESS`
+상태: `DONE`
 
 질문:
 
@@ -171,6 +171,8 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 ```
 
 T5-03 테스트: posted=3 aggregated=1 (ADR 009).
+T5-05: Dashboard 같은 eventId 3회 → 노출 1.
+데모 종료: UNIQUE 집계 (ADR 009·010). SSE / Kafka 멱등 Consumer는 넣지 않음.
 
 ---
 
@@ -227,12 +229,13 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 5
-상태: IN PROGRESS
+Current Phase: Phase 5 DONE
+상태: DONE
 T5-01: DONE (동일 eventId 중복 집계 재현)
 T5-02: DONE (후보 C. UNIQUE로 진행)
 T5-03: DONE (eventId UNIQUE, ADR 009)
 T5-04: DONE (후보 B. 화면 시연으로 진행)
 T5-05: DONE (Dashboard 같은 eventId 3회 → 노출 1)
-다음: Phase 5 다음 Task는 개발자가 요청할 때
+T5-06: DONE (Phase 5 닫기, ADR 010)
+다음: Phase 6는 개발자가 요청할 때
 ```
