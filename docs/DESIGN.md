@@ -133,6 +133,7 @@ T4-04 측정: workerHoldMs=400 getAdsWaitMs=431 postMs=3 pool=1. 풀 분리 없�
 T4-05 측정: accepted=1 afterCrashPersisted=0 replayed=0 persistDelayMs=400. 재처리 없음.
 T5-01 측정: posted=3 uniqueEventIds=1 aggregated=3. 멱등 없음 (해법 전).
 T5-03 측정: posted=3 uniqueEventIds=1 aggregated=1 (ADR 009).
+T5-05: README curl 3회 201, GET dashboard impressions=1. Player는 새 eventId.
 
 아직 코드에 없는 것:
 

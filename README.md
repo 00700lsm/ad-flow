@@ -29,11 +29,11 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 3
-예산 초과 소진
-T3-03 선택 시점 원자적 차감 (PostgreSQL)
-T3-04 Dashboard에서 예산 감소와 BUDGET_EXHAUSTED 확인
-Redis 없음
+Phase 5
+중복 이벤트와 정산
+T5-03 eventId UNIQUE (ADR 009)
+T5-05 Dashboard에서 같은 eventId 3회 → 노출 1
+Redis / Kafka 없음
 ```
 
 Campaign Console에서 광고를 만들고, OTT Player에서 노출되며, Dashboard에서 Impression / Click / 사용 예산 / 상태를 확인할 수 있다.
@@ -99,6 +99,18 @@ Frequency Cap을 Player에서 보려면 Console에서 같은 타겟(20–39세, 
 ```
 
 같은 Player에서 두 번 재생한다. 이력 1번째는 고우선, 2번째는 저우선이어야 한다. `/dashboard.html`에서 고우선은 사용 1 / 잔여 0 / `BUDGET_EXHAUSTED`다. 재생할 때마다 `GET /ads`가 예산을 소비한다.
+
+같은 `eventId` 중복 집계를 Dashboard에서 보려면 Console에서 캠페인·크리에이티브 하나를 만든 뒤, 그 id로 Impression을 **같은 eventId로 세 번** 보낸다. Player 반복 재생은 매번 새 `eventId`라서 이 시연이 아니다.
+
+```bash
+# campaignId / creativeId 는 Console에서 만든 값
+curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8080/events/impression \
+  -H 'Content-Type: application/json' \
+  -d '{"eventId":"dup-demo-1","campaignId":1,"creativeId":1,"userId":1,"contentId":1}'
+# 위 요청을 두 번 더 반복한다. 세 번 모두 201이어야 한다.
+```
+
+`/dashboard.html`에서 해당 캠페인 노출은 1이다. HTTP 201은 큐 접수이며 INSERT 완료가 아니다.
 
 ---
 

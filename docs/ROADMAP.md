@@ -232,6 +232,7 @@ Current Phase: Phase 5
 T5-01: DONE (동일 eventId 중복 집계 재현)
 T5-02: DONE (후보 C. UNIQUE로 진행)
 T5-03: DONE (eventId UNIQUE, ADR 009)
-T5-04: DONE (후보 B. 화면 시연으로 진행, 미구현)
-다음: Dashboard/Player 중복 eventId 시연은 개발자가 요청할 때
+T5-04: DONE (후보 B. 화면 시연으로 진행)
+T5-05: DONE (Dashboard 같은 eventId 3회 → 노출 1)
+다음: Phase 5 다음 Task는 개발자가 요청할 때
 ```

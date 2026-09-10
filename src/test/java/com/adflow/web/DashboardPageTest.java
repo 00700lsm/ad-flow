@@ -34,4 +34,16 @@ class DashboardPageTest {
         assertThat(html).contains("c.remainingBudget");
         assertThat(html).contains("c.status");
     }
+
+    @Test
+    void dashboardHtmlMentionsDuplicateEventIdCountsOnce() throws Exception {
+        String html = mockMvc.perform(get("/dashboard.html"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(html).contains("eventId");
+        assertThat(html).contains("한 번");
+    }
 }
