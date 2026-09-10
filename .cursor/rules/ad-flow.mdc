@@ -36,6 +36,7 @@ Product → Problem → Experiment → Engineering → Result
 진행
 T2-01
 승인
+커밋하지 마
 커밋 푸시
 ```
 
@@ -163,7 +164,7 @@ Race Condition은 코드 작성 단계에서 추측으로 예방하지 않는다
 3B Green        최소 구현. 신규 파일만 전체 작성, 기존은 패치
 3C Lint         린트/컴파일 에러만 고침
 3D Refactor     행위 변경 없이. 테스트 유지
-4  Summary      그 Task만 TASKS/DESIGN 동기화. 다음 Task로 넘어가지 않는다. 커밋은 요청 시에만
+4  Summary      그 Task만 TASKS/DESIGN 동기화. 그 Task를 커밋한다 (ADR 014). 다음 Task로 넘어가지 않는다.
 ```
 
 한 요청의 범위는 `docs/TASKS.md`의 Task 하나다. Phase 전체를 구현하지 않는다.
@@ -224,7 +225,17 @@ Phase 1 완료 조건은 Test + Demo 경로다. Experiment가 아니다.
 ## 9. Git
 
 문제 재현과 해결을 한 커밋에 섞지 않는다.
-사용자가 커밋을 요청하기 전에는 커밋하지 않는다.
+
+Task Summary가 끝나면 그 Task 산출물만 커밋한다 (ADR 014).
+`커밋`을 기다리지 않는다. Plan HITL 중에는 커밋하지 않는다.
+푸시·force·amend는 요청 없이 하지 않는다.
+
+```text
+넣는 것    artifacts/<id>/, 그 Task 코드·테스트·TASKS/DESIGN/ROADMAP/README
+빼는 것    다른 Task 파일, 측정 시간만 바뀐 옛 measurement, 비밀
+메시지     feat|docs|test: … (T7-09)  왜인지 한두 문장
+개발자가 `커밋하지 마`면 커밋하지 않는다
+```
 
 ---
 
@@ -235,5 +246,5 @@ Phase 1 완료 조건은 Test + Demo 경로다. Experiment가 아니다.
 2. REQUIREMENTS / DESIGN / ROADMAP의 관련 절을 확인한다.
 3. `.agent/config.yaml`을 확인한다.
 4. 스킬 `ad-flow-vibe-coding`을 따른다.
-5. 그 Task의 Summary가 끝나면 STOP한다. 다음 Task를 이어서 하지 않는다.
+5. 그 Task의 Summary가 끝나면 그 Task를 커밋하고 STOP한다. 다음 Task를 이어서 하지 않는다.
 6. 코드를 썼다는 이유만으로 Task를 DONE 하지 않는다.

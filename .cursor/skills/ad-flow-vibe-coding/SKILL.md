@@ -76,7 +76,7 @@ Frequency Cap / Budget 동시성 해법
 
 4. Summary
    그 Task만 TASKS/DESIGN을 맞춘다.
-   커밋은 사용자가 요청할 때만.
+   그 Task 산출물만 커밋한다 (ADR 014). 푸시는 하지 않는다.
    다음 Task로 넘어가지 않고 STOP한다.
 ```
 
