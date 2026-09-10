@@ -143,7 +143,7 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 
 ## Phase 4. 서빙과 이벤트 처리 결합
 
-상태: `IN PROGRESS`
+상태: `DONE`
 
 질문:
 
@@ -151,6 +151,8 @@ Lock / Redis 후보는 측정 후 Human Gate에서 고른다.
 대량 Impression을 Serving 경로에서 감당할 수 있는가?
 
 완료 조건: FR-11. 기술은 결과가 필요성을 말할 때만 고른다.
+
+데모 종료: 접수 분리(T4-02). 재처리·Kafka·풀 분리는 넣지 않음 (ADR 006·007).
 
 ---
 
@@ -222,12 +224,14 @@ Legacy → New 점진 전환과 Shadow Traffic
 
 ```text
 Current Phase: Phase 4
-상태: IN PROGRESS
+상태: DONE
 T4-01: DONE (Serving·Event 커넥션 결합 재현)
 T4-02: DONE (JVM 큐 접수, ADR 005)
 T4-03: DONE (접수 직후 집계 공백 재현)
-T4-04: DONE (워커·GET 풀 공유 재현)
+T4-04: DONE (워커·GET 풀 공유 재현, Human Gate A)
 T4-05: DONE (워커 장애 후 재처리 불가 재현, Human Gate A = ADR 006 유지)
+T4-06: DONE (데모 범위 고정, ADR 007)
 유실: A 선택 (데모 감수, ADR 006)
-다음: Phase 4 남은 항목은 개발자가 요청할 때
+풀: A 선택 (같은 DataSource, ADR 007)
+다음: Phase 5는 개발자가 요청할 때
 ```

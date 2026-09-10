@@ -75,6 +75,6 @@ Outbox·Kafka는 넣지 않는다. FR-11의 “장애 후 재처리”는 이 �
 하지 않는 것 Outbox, Kafka, 201 계약 변경
 남은 한계    큐만 있는 동안 프로세스 종료 → 집계 유실
              take 이후 워커 장애 → 재처리 없음 (T4-05)
-             워커 INSERT와 GET /ads 는 같은 DataSource
+             워커 INSERT와 GET /ads 는 같은 DataSource (T4-06에서 감수, ADR 007)
 다음에 볼 때 유실이 제품 문제가 되면 B 또는 C를 다시 Human Gate
 ```

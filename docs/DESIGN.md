@@ -93,9 +93,10 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 4
+Phase 4 DONE (데모)
 서빙과 이벤트 처리 결합
 코드: T4-02 이벤트 API는 큐 접수 후 201. INSERT는 JVM 워커. Kafka 없음
+데모 범위: 접수 분리. 재처리·풀 분리는 한계 (ADR 006·007)
 ```
 
 현재 구조:
@@ -125,9 +126,9 @@ T3-02 측정(해법 전): requests=16 selected=16 impressions=16 budget=1 spent=
 T3-03 테스트(해법 후, 동시 GET): requests=16 selected=1 budget=1 spent=1.
 T3-04에서 Dashboard에 spentBudget / remainingBudget / status를 붙였다. budget=1 고우선 다음 저우선이 나온다.
 T4-01 측정: eventHoldMs=400 getAdsWaitMs=409 pool=1.
-T4-02 측정: persistDelayMs=400 postMs=2. 프로세스 유실·워커와 GET의 풀 공유는 남음.
+T4-02 측정: persistDelayMs=400 postMs=2. 프로세스 유실·워커와 GET의 풀 공유는 감수 (ADR 006·007).
 T4-03 측정: accepted=1 persistedImmediately=0 persistedAfterWait=1. 내구성 해법 없음.
-T4-04 측정: workerHoldMs=400 getAdsWaitMs=431 postMs=3 pool=1. 풀 분리 없음.
+T4-04 측정: workerHoldMs=400 getAdsWaitMs=431 postMs=3 pool=1. 풀 분리 없음 (ADR 007 A).
 T4-05 측정: accepted=1 afterCrashPersisted=0 replayed=0 persistDelayMs=400. 재처리 없음.
 
 아직 코드에 없는 것:
@@ -702,14 +703,16 @@ T4-02 (ADR 005): POST는 큐 적재 후 201. persistDelayMs=400일 때 postMs=2.
 T4-03: 워커 delay 중 Dashboard 노출은 0. 살아 있으면 이후 1.
 데모에서는 그 창의 유실을 감수한다 (ADR 006). Outbox / Kafka 없음.
 T4-04: 워커가 INSERT 커넥션을 붙잡으면 GET `/ads`가 기다렸다. workerHoldMs=400 getAdsWaitMs=431 pool=1.
+해법은 A. 같은 DataSource 유지 (ADR 007).
 T4-05: take 이후 delay 중 워커 interrupt → 재시작해도 Dashboard 노출 0. accepted=1 replayed=0. 재처리 해법은 A(ADR 006 유지). Kafka / Outbox 없음.
+T4-06: Phase 4 데모 완료 = 접수 분리. FR-11 재처리·Kafka는 미충족 (ADR 007).
 
 현재 코드 (T4-02):
 
 ```text
 POST /events/*  → 메모리 큐 → 201
 워커            → PostgreSQL INSERT
-GET /ads 와 워커는 같은 DataSource
+GET /ads 와 워커는 같은 DataSource (데모에서 감수, ADR 007)
 프로세스 종료 시 큐 유실 (데모에서 감수, ADR 006)
 take 이후 워커 장애 시 재처리 없음 (T4-05)
 ```

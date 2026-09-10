@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T4-05 DONE
-Phase 4: IN PROGRESS
-T4-01 ~ T4-05: DONE
-다음: Phase 4 다음 Task는 개발자가 요청할 때
+현재 Task: T4-06 DONE
+Phase 4: DONE
+T4-01 ~ T4-06: DONE
+다음: Phase 5는 개발자가 요청할 때
 ```
 
 ---
@@ -32,14 +32,16 @@ T4-01 ~ T4-05: DONE
 ```text
 Phase 4
 서빙과 이벤트 처리 결합
-상태: IN PROGRESS
+상태: DONE
 ```
 
 목표:
 
 이벤트 적재가 느려도 광고 선택 API가 같이 멈추지 않는지 먼저 재현한다. 분리 기술은 측정 후 Human Gate에서 고른다.
 
-Phase 3는 DONE이다. FR-11 전체를 한 Task로 구현하지 않는다.
+데모 완료는 접수 분리(T4-02)다. 재처리·풀 분리는 한계로 남긴다 (ADR 006·007).
+
+Phase 5 Task는 이 문서를 열 때 적는다. FR-12 전체를 한 Task로 구현하지 않는다.
 
 ---
 
@@ -65,6 +67,18 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T4-06. Phase 4 데모 범위 고정
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+FR-11 중 충족(T4-02 접수 분리)과 한계(재처리 ADR 006, 풀 공유 T4-04)를 문서로 고정한다
+Phase 4를 데모 범위로 닫는다 (ADR 007)
+Kafka / Outbox / 별도 DataSource 구현은 포함하지 않는다
+```
 
 ## T4-05. 워커 장애 후 재처리 불가 재현
 
@@ -370,8 +384,10 @@ Phase 4:
 - [x] T4-01 Serving·Event 결합 재현
 - [x] T4-02 JVM 큐 접수 (ADR 005)
 - [x] T4-03 접수 직후 집계 공백 재현
-- [x] T4-04 워커·GET 풀 공유 재현
+- [x] T4-04 워커·GET 풀 공유 재현 (해법 A, ADR 007)
 - [x] T4-05 워커 장애 후 재처리 불가 재현
-- [ ] FR-11 Consumer 재처리 / Kafka (데모에서 A, ADR 006)
+- [x] T4-06 Phase 4 데모 범위 고정 (ADR 007)
+- [x] FR-11 접수 분리 (데모, T4-02)
+- [ ] FR-11 Consumer 재처리 / Kafka (ADR 006, Phase 4에서 미충족)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

@@ -383,11 +383,11 @@ Impression / Click 이벤트
 
 ### Phase 4. Kafka Event Pipeline
 
-```text
-OTT Player → Event API → Kafka → Consumer → Aggregation
-```
+목표 그림은 Kafka다. **현재 코드는 JVM 메모리 큐+워커**다 (ADR 005). 데모 Phase 4는 접수 분리까지 닫았다 (ADR 007). 재처리·Kafka는 없다.
 
-API와 이벤트 처리를 분리하고, 대량 이벤트 · Consumer 장애 · 재처리 가능한 구조를 만든다.
+```text
+OTT Player → Event API → 메모리 큐 → 워커 INSERT → Aggregation
+```
 
 ### Phase 5. 이벤트 중복과 정합성
 
