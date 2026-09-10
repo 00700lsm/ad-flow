@@ -178,11 +178,15 @@ T5-05: Dashboard 같은 eventId 3회 → 노출 1.
 
 ## Phase 6. 운영자가 이벤트를 보는가
 
+상태: `IN PROGRESS`
+
 질문:
 
 시스템 내부 이벤트를 화면에서 실시간으로 볼 수 있는가?
 
 완료 조건: FR-13.
+
+T6-01 측정: pollMs=3000 sse=0. 해법 A. 3초 폴링 감수 (ADR 011). FR-13 미충족.
 
 ---
 
@@ -229,13 +233,8 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 5 DONE
-상태: DONE
-T5-01: DONE (동일 eventId 중복 집계 재현)
-T5-02: DONE (후보 C. UNIQUE로 진행)
-T5-03: DONE (eventId UNIQUE, ADR 009)
-T5-04: DONE (후보 B. 화면 시연으로 진행)
-T5-05: DONE (Dashboard 같은 eventId 3회 → 노출 1)
-T5-06: DONE (Phase 5 닫기, ADR 010)
-다음: Phase 6는 개발자가 요청할 때
+Current Phase: Phase 6
+상태: IN PROGRESS
+T6-01: DONE (초당 지표·SSE 없음. 후보 A, ADR 011)
+다음: Phase 6 다음 Task는 개발자가 요청할 때
 ```

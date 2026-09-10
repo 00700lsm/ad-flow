@@ -1,0 +1,1 @@
+pollMs=3000 sse=0 impressionsPerSecField=0

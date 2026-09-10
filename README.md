@@ -29,11 +29,9 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 5 DONE
-중복 이벤트와 정산
-T5-03 eventId UNIQUE (ADR 009)
-T5-05 Dashboard에서 같은 eventId 3회 → 노출 1
-T5-06 데모 범위 고정 (ADR 010)
+Phase 6
+운영자가 이벤트를 보는가
+T6-01 Dashboard 3초 폴링. 초당 지표·SSE 없음
 Redis / Kafka 없음
 ```
 

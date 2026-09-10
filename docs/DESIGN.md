@@ -93,10 +93,9 @@ AI는 핵심 시스템을 완성한 뒤 운영 자동화 영역에서만 선택�
 ```text
 Current Phase
 
-Phase 5 DONE (ADR 010)
-중복 이벤트와 정산
-코드: 워커 INSERT. eventId UNIQUE. 충돌은 건너뜀. Kafka 없음
-다음: Phase 6는 개발자가 요청할 때
+Phase 6
+운영자가 이벤트를 보는가
+코드: Dashboard 누적 집계. 3초 폴링. SSE / 초당 지표 없음
 ```
 
 현재 구조:
@@ -136,6 +135,7 @@ T5-01 측정: posted=3 uniqueEventIds=1 aggregated=3. 멱등 없음 (해법 전)
 T5-03 측정: posted=3 uniqueEventIds=1 aggregated=1 (ADR 009).
 T5-05: README curl 3회 201, GET dashboard impressions=1. Player는 새 eventId.
 T5-06: Phase 5 데모 완료 = UNIQUE 집계. SSE / Kafka 멱등 Consumer는 없음 (ADR 010).
+T6-01 측정: pollMs=3000 sse=0 impressionsPerSecField=0. 실시간 해법 없음 (ADR 011 A).
 
 아직 코드에 없는 것:
 
@@ -781,7 +781,10 @@ Kafka 그림은 목표다. 지금 멱등은 UNIQUE다.
 
 ## 12.6 Phase 6. 실시간 Dashboard
 
-Kafka Consumer에서 처리되는 광고 이벤트를 SSE 또는 WebSocket으로 전달한다.
+Kafka Consumer에서 처리되는 광고 이벤트를 SSE 또는 WebSocket으로 전달한다. **현재 코드는 누적 집계 + 3초 폴링**이다. SSE / 초당 지표 없음.
+
+T6-01 (해법 전): GET CampaignStats에 impressionsPerSec · clicksPerSec · kafkaLag 없음. pollMs=3000 sse=0.
+해법은 A. 3초 폴링 누적 유지 (ADR 011). SSE / 초당 필드 없음.
 
 ```text
 Impression / sec

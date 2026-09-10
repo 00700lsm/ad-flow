@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T5-06 DONE
-Phase 5: DONE
-T5-01 ~ T5-06: DONE
-다음: Phase 6는 개발자가 요청할 때
+현재 Task: T6-01 DONE
+Phase 6: IN PROGRESS
+T6-01: DONE
+다음: Phase 6 다음 Task는 개발자가 요청할 때
 ```
 
 ---
@@ -30,16 +30,16 @@ T5-01 ~ T5-06: DONE
 # 1. 현재 Phase
 
 ```text
-Phase 5
-중복 이벤트와 정산
-상태: DONE
+Phase 6
+운영자가 이벤트를 보는가
+상태: IN PROGRESS
 ```
 
 목표:
 
-같은 eventId가 여러 번 오면 집계가 여러 번 오르는지 먼저 재현한다. 멱등 기술은 측정 후 Human Gate에서 고른다.
+Dashboard에 초당 지표·실시간 푸시가 있는지 먼저 재현한다. SSE / 초당 필드는 측정 후 Human Gate에서 고른다.
 
-Phase 5 데모 완료는 T5-03 테스트 + T5-05 시연이다 (ADR 010). Phase 6 Task는 이 문서에 미리 넣지 않는다.
+Phase 5는 DONE이다 (ADR 010). FR-13 전체를 한 Task로 구현하지 않는다.
 
 ---
 
@@ -49,12 +49,11 @@ Phase 5 데모 완료는 T5-03 테스트 + T5-05 시연이다 (ADR 010). Phase 6
 Kafka / Redis / Consumer 재처리
 k6 / Prometheus / Grafana
 Traffic Simulator API
-SSE / WebSocket
+Human Gate 전 SSE / WebSocket / 초당 지표
 Mock Ad Exchange
 Kubernetes / AWS
 운영 AI
-Frequency Cap / Budget 계약 변경
-Human Gate 전 UNIQUE / 멱등 해법
+Frequency Cap / Budget / UNIQUE 계약 변경
 ```
 
 ROADMAP에 있다는 이유만으로 구현하지 않는다.
@@ -65,6 +64,20 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T6-01. Dashboard 초당 지표·실시간 푸시 공백 재현
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+GET /dashboard 응답에 Impression/sec · Click/sec · Lag가 없다
+dashboard.html은 3초 폴링이고 SSE가 없다
+공백을 테스트로 재현하고 남긴다
+SSE / 초당 지표 구현 / Kafka는 포함하지 않는다
+Human Gate A. 데모에서 3초 폴링 감수 (ADR 011)
+```
 
 ## T5-06. Phase 5 데모 범위 고정
 
@@ -472,5 +485,10 @@ Phase 5:
 - [x] T5-05 Dashboard에서 중복 eventId 집계 1 시연
 - [x] T5-06 Phase 5 데모 범위 고정 (ADR 010)
 - [x] FR-12 멱등 (입력 3 / 유효 1 / 집계 +1, T5-03 테스트 + T5-05 시연)
+
+Phase 6:
+
+- [x] T6-01 Dashboard 초당 지표·실시간 푸시 공백 재현
+- [ ] FR-13 실시간 Dashboard (ADR 011 A, 데모 폴링 감수)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.
