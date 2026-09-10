@@ -19,10 +19,10 @@ Phase를 한 번에 구현하지 않는다. `docs/adr/001-one-task-at-a-time.md`
 에이전트는 아래 포인터를 먼저 본다. 사용자에게 문서 경로를 묻지 않는다.
 
 ```text
-현재 Task: T6-01 DONE
-Phase 6: IN PROGRESS
-T6-01: DONE
-다음: Phase 6 다음 Task는 개발자가 요청할 때
+현재 Task: T6-02 DONE
+Phase 6: DONE
+T6-01 ~ T6-02: DONE
+다음: Phase 7는 개발자가 요청할 때
 ```
 
 ---
@@ -32,14 +32,14 @@ T6-01: DONE
 ```text
 Phase 6
 운영자가 이벤트를 보는가
-상태: IN PROGRESS
+상태: DONE
 ```
 
 목표:
 
 Dashboard에 초당 지표·실시간 푸시가 있는지 먼저 재현한다. SSE / 초당 필드는 측정 후 Human Gate에서 고른다.
 
-Phase 5는 DONE이다 (ADR 010). FR-13 전체를 한 Task로 구현하지 않는다.
+Phase 6 데모 완료는 3초 폴링 누적이다 (ADR 011·012). FR-13 초당·SSE는 미충족. Phase 7 Task는 이 문서에 미리 넣지 않는다.
 
 ---
 
@@ -64,6 +64,18 @@ ROADMAP에 있다는 이유만으로 구현하지 않는다.
 
 각 Task는 코드부터 쓰지 않는다.
 `.agent/artifacts/<task-id>/analysis.md`와 `plan.md`를 남기고, Plan HITL 승인 후에 Red Test부터 시작한다.
+
+## T6-02. Phase 6 데모 범위 고정
+
+상태: `DONE`
+
+완료 조건:
+
+```text
+FR-13 중 재현(T6-01 폴링 공백)과 한계(ADR 011)를 문서로 고정한다
+Phase 6를 데모 범위로 닫는다 (ADR 012)
+SSE / 초당 지표 / Kafka는 포함하지 않는다
+```
 
 ## T6-01. Dashboard 초당 지표·실시간 푸시 공백 재현
 
@@ -489,6 +501,7 @@ Phase 5:
 Phase 6:
 
 - [x] T6-01 Dashboard 초당 지표·실시간 푸시 공백 재현
-- [ ] FR-13 실시간 Dashboard (ADR 011 A, 데모 폴링 감수)
+- [x] T6-02 Phase 6 데모 범위 고정 (ADR 012)
+- [ ] FR-13 실시간 Dashboard (ADR 011·012, Phase 6에서 미충족)
 
 다음 Phase 작업은 이 문서에 미리 넣지 않는다.

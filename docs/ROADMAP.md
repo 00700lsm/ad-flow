@@ -178,7 +178,7 @@ T5-05: Dashboard 같은 eventId 3회 → 노출 1.
 
 ## Phase 6. 운영자가 이벤트를 보는가
 
-상태: `IN PROGRESS`
+상태: `DONE`
 
 질문:
 
@@ -186,7 +186,8 @@ T5-05: Dashboard 같은 eventId 3회 → 노출 1.
 
 완료 조건: FR-13.
 
-T6-01 측정: pollMs=3000 sse=0. 해법 A. 3초 폴링 감수 (ADR 011). FR-13 미충족.
+T6-01 측정: pollMs=3000 sse=0. 해법 A. 3초 폴링 감수 (ADR 011).
+데모 종료: 3초 폴링 누적 (ADR 012). 초당 지표·SSE는 넣지 않음. FR-13 미충족.
 
 ---
 
@@ -233,8 +234,9 @@ Legacy → New 점진 전환과 Shadow Traffic
 # 6. 현재 위치
 
 ```text
-Current Phase: Phase 6
-상태: IN PROGRESS
+Current Phase: Phase 6 DONE
+상태: DONE
 T6-01: DONE (초당 지표·SSE 없음. 후보 A, ADR 011)
-다음: Phase 6 다음 Task는 개발자가 요청할 때
+T6-02: DONE (Phase 6 닫기, ADR 012)
+다음: Phase 7는 개발자가 요청할 때
 ```

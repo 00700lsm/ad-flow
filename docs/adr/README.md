@@ -40,6 +40,7 @@ Phase 4 데모 완료 범위 → `007-phase4-demo-accept-split-only.md`
 같은 eventId 집계 UNIQUE → `009-event-id-unique-aggregation.md`
 Phase 5 데모 완료 범위 → `010-phase5-demo-event-id-unique.md`
 데모에서 Dashboard 폴링만 둘지 → `011-accept-dashboard-poll-only.md`
+Phase 6 데모 완료 범위 → `012-phase6-demo-poll-only.md`
 Source of Truth와 Realtime Counter를 나눌지
 프로젝트 Scope 변경
 Phase 완료 조건을 바꿀지

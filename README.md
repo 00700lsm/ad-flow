@@ -29,9 +29,10 @@ Traffic Simulator로 가상의 대규모 사용자를 발생시킬 수 있다
 ## Current Status
 
 ```text
-Phase 6
+Phase 6 DONE
 운영자가 이벤트를 보는가
 T6-01 Dashboard 3초 폴링. 초당 지표·SSE 없음
+T6-02 데모 범위 고정 (ADR 012)
 Redis / Kafka 없음
 ```
 
